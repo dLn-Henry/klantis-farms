@@ -2,21 +2,6 @@
 import { createClient } from "@/lib/supabase/server";
 import type { Animal, AnimalEvent } from "@/lib/data/mock/animals";
 
-// ============================================================================
-// This repository now queries Supabase instead of lib/data/mock/animals.ts.
-// The mock file is kept around only for its TypeScript types (Animal,
-// AnimalEvent, AnimalStatus) and as a reference for what the seed data
-// looks like — its `animals` array is no longer read by this file.
-//
-// Note on approach: rather than using Supabase's embedded-relation select
-// syntax (e.g. `.select("*, species(name)")`), this fetches species/breeds
-// as small separate lookups and joins them in plain JavaScript. That's a
-// bit more verbose, but avoids depending on relation-typing behavior that
-// couldn't be verified against the real library in the environment this
-// was written in. Once confirmed working, feel free to simplify to an
-// embedded select if you prefer.
-// ============================================================================
-
 type AnimalRow = {
   id: string;
   tag: string;
@@ -38,6 +23,7 @@ type LookupRow = {
 function calculateAge(dob: string): string {
   const birth = new Date(dob);
   const now = new Date();
+
   let years = now.getFullYear() - birth.getFullYear();
   let months = now.getMonth() - birth.getMonth();
 
@@ -108,7 +94,9 @@ export async function getAllAnimals(): Promise<Animal[]> {
       getLookupMaps(),
     ]);
 
-  if (error) throw error;
+  if (error) {
+    throw error;
+  }
 
   return (rows ?? []).map((row) =>
     mapAnimalRow(row, speciesMap, breedsMap)
@@ -132,7 +120,9 @@ export async function getAnimalById(
       getLookupMaps(),
     ]);
 
-  if (error || !row) return undefined;
+  if (error || !row) {
+    return undefined;
+  }
 
   const { data: eventRows } = await supabase
     .from("animal_events")
@@ -153,10 +143,12 @@ export async function getAnimalById(
 }
 ```
 
-Replace the contents of **`lib/data/repositories/animals.ts`** with that version, save it, and run:
+Then save it and run **only**:
 
 ```bash
 npm run build
 ```
 
-Then paste the next output here.
+The previous `never` error should now be addressed, and we've removed the text that caused the syntax error.
+
+Paste the next build output here.
