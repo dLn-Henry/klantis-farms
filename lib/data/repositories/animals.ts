@@ -1,3 +1,4 @@
+```tsx
 import { createClient } from "@/lib/supabase/server";
 import type { Animal, AnimalEvent } from "@/lib/data/mock/animals";
 
@@ -29,26 +30,44 @@ type AnimalRow = {
   breed_id: string | null;
 };
 
+type LookupRow = {
+  id: string;
+  name: string;
+};
+
 function calculateAge(dob: string): string {
   const birth = new Date(dob);
   const now = new Date();
   let years = now.getFullYear() - birth.getFullYear();
   let months = now.getMonth() - birth.getMonth();
+
   if (months < 0) {
     years -= 1;
     months += 12;
   }
+
   return years > 0 ? `${years}y ${months}m` : `${months}m`;
 }
 
 async function getLookupMaps() {
   const supabase = createClient();
+
   const [{ data: species }, { data: breeds }] = await Promise.all([
     supabase.from("species").select("id, name"),
     supabase.from("breeds").select("id, name"),
   ]);
-  const speciesMap = new Map((species ?? []).map((s) => [s.id, s.name]));
-  const breedsMap = new Map((breeds ?? []).map((b) => [b.id, b.name]));
+
+  const speciesRows = (species ?? []) as LookupRow[];
+  const breedRows = (breeds ?? []) as LookupRow[];
+
+  const speciesMap = new Map(
+    speciesRows.map((s) => [s.id, s.name])
+  );
+
+  const breedsMap = new Map(
+    breedRows.map((b) => [b.id, b.name])
+  );
+
   return { speciesMap, breedsMap };
 }
 
@@ -65,7 +84,10 @@ function mapAnimalRow(
     sex: (row.sex as "Male" | "Female") ?? "Male",
     dob: row.date_of_birth ?? "",
     ageLabel: row.date_of_birth ? calculateAge(row.date_of_birth) : "—",
-    weight: row.current_weight != null ? `${row.current_weight} ${row.weight_unit ?? "kg"}` : "—",
+    weight:
+      row.current_weight != null
+        ? `${row.current_weight} ${row.weight_unit ?? "kg"}`
+        : "—",
     location: row.location ?? "—",
     status: (row.status as Animal["status"]) ?? "Active",
     events: [],
@@ -75,29 +97,40 @@ function mapAnimalRow(
 export async function getAllAnimals(): Promise<Animal[]> {
   const supabase = createClient();
 
-  const [{ data: rows, error }, { speciesMap, breedsMap }] = await Promise.all([
-    supabase
-      .from("animals")
-      .select("id, tag, sex, date_of_birth, current_weight, weight_unit, location, status, species_id, breed_id")
-      .order("tag"),
-    getLookupMaps(),
-  ]);
+  const [{ data: rows, error }, { speciesMap, breedsMap }] =
+    await Promise.all([
+      supabase
+        .from("animals")
+        .select(
+          "id, tag, sex, date_of_birth, current_weight, weight_unit, location, status, species_id, breed_id"
+        )
+        .order("tag"),
+      getLookupMaps(),
+    ]);
 
   if (error) throw error;
-  return (rows ?? []).map((row) => mapAnimalRow(row, speciesMap, breedsMap));
+
+  return (rows ?? []).map((row) =>
+    mapAnimalRow(row, speciesMap, breedsMap)
+  );
 }
 
-export async function getAnimalById(id: string): Promise<Animal | undefined> {
+export async function getAnimalById(
+  id: string
+): Promise<Animal | undefined> {
   const supabase = createClient();
 
-  const [{ data: row, error }, { speciesMap, breedsMap }] = await Promise.all([
-    supabase
-      .from("animals")
-      .select("id, tag, sex, date_of_birth, current_weight, weight_unit, location, status, species_id, breed_id")
-      .eq("id", id)
-      .single(),
-    getLookupMaps(),
-  ]);
+  const [{ data: row, error }, { speciesMap, breedsMap }] =
+    await Promise.all([
+      supabase
+        .from("animals")
+        .select(
+          "id, tag, sex, date_of_birth, current_weight, weight_unit, location, status, species_id, breed_id"
+        )
+        .eq("id", id)
+        .single(),
+      getLookupMaps(),
+    ]);
 
   if (error || !row) return undefined;
 
@@ -113,5 +146,17 @@ export async function getAnimalById(id: string): Promise<Animal | undefined> {
     detail: e.detail ?? "",
   }));
 
-  return { ...mapAnimalRow(row, speciesMap, breedsMap), events };
+  return {
+    ...mapAnimalRow(row, speciesMap, breedsMap),
+    events,
+  };
 }
+```
+
+Replace the contents of **`lib/data/repositories/animals.ts`** with that version, save it, and run:
+
+```bash
+npm run build
+```
+
+Then paste the next output here.
