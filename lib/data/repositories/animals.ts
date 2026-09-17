@@ -28,15 +28,15 @@ function calculateAge(dob: string): string {
   let months = now.getMonth() - birth.getMonth();
 
   if (months < 0) {
-    years -= 1;
-    months += 12;
+    years = years - 1;
+    months = months + 12;
   }
 
   if (years > 0) {
-    return `${years}y ${months}m`;
+    return String(years) + "y " + String(months) + "m";
   }
 
-  return `${months}m`;
+  return String(months) + "m";
 }
 
 async function getLookupMaps() {
@@ -50,20 +50,19 @@ async function getLookupMaps() {
     .from("breeds")
     .select("id, name");
 
-  const speciesRows = (speciesResult.data ?? []) as LookupRow[];
-  const breedRows = (breedsResult.data ?? []) as LookupRow[];
+  const speciesRows = (speciesResult.data || []) as LookupRow[];
+  const breedRows = (breedsResult.data || []) as LookupRow[];
 
   const speciesMap = new Map<string, string>();
-
-  for (const species of speciesRows) {
-    speciesMap.set(species.id, species.name);
-  }
-
   const breedsMap = new Map<string, string>();
 
-  for (const breed of breedRows) {
+  speciesRows.forEach((species) => {
+    speciesMap.set(species.id, species.name);
+  });
+
+  breedRows.forEach((breed) => {
     breedsMap.set(breed.id, breed.name);
-  }
+  });
 
   return {
     speciesMap,
@@ -76,26 +75,32 @@ function mapAnimalRow(
   speciesMap: Map<string, string>,
   breedsMap: Map<string, string>
 ): Animal {
+  const species =
+    row.species_id && speciesMap.has(row.species_id)
+      ? speciesMap.get(row.species_id) || "—"
+      : "—";
+
+  const breed =
+    row.breed_id && breedsMap.has(row.breed_id)
+      ? breedsMap.get(row.breed_id) || "—"
+      : "—";
+
+  const weight =
+    row.current_weight !== null
+      ? String(row.current_weight) + " " + (row.weight_unit || "kg")
+      : "—";
+
   return {
     id: row.id,
     tag: row.tag,
-    species: row.species_id
-      ? speciesMap.get(row.species_id) ?? "—"
-      : "—",
-    breed: row.breed_id
-      ? breedsMap.get(row.breed_id) ?? "—"
-      : "—",
-    sex: (row.sex as "Male" | "Female") ?? "Male",
-    dob: row.date_of_birth ?? "",
-    ageLabel: row.date_of_birth
-      ? calculateAge(row.date_of_birth)
-      : "—",
-    weight:
-      row.current_weight != null
-        ? `${row.current_weight} ${row.weight_unit ?? "kg"}`
-        : "—",
-    location: row.location ?? "—",
-    status: (row.status as Animal["status"]) ?? "Active",
+    species: species,
+    breed: breed,
+    sex: (row.sex as "Male" | "Female") || "Male",
+    dob: row.date_of_birth || "",
+    ageLabel: row.date_of_birth ? calculateAge(row.date_of_birth) : "—",
+    weight: weight,
+    location: row.location || "—",
+    status: (row.status as Animal["status"]) || "Active",
     events: [],
   };
 }
@@ -103,23 +108,22 @@ function mapAnimalRow(
 export async function getAllAnimals(): Promise<Animal[]> {
   const supabase = createClient();
 
-  const animalsResult = await supabase
+  const result = await supabase
     .from("animals")
     .select(
       "id, tag, sex, date_of_birth, current_weight, weight_unit, location, status, species_id, breed_id"
     )
     .order("tag");
 
-  const { speciesMap, breedsMap } = await getLookupMaps();
-
-  if (animalsResult.error) {
-    throw animalsResult.error;
+  if (result.error) {
+    throw result.error;
   }
 
-  const rows = (animalsResult.data ?? []) as AnimalRow[];
+  const lookupMaps = await getLookupMaps();
+  const rows = (result.data || []) as AnimalRow[];
 
   return rows.map((row) =>
-    mapAnimalRow(row, speciesMap, breedsMap)
+    mapAnimalRow(row, lookupMaps.speciesMap, lookupMaps.breedsMap)
   );
 }
 
@@ -128,7 +132,7 @@ export async function getAnimalById(
 ): Promise<Animal | undefined> {
   const supabase = createClient();
 
-  const animalResult = await supabase
+  const result = await supabase
     .from("animals")
     .select(
       "id, tag, sex, date_of_birth, current_weight, weight_unit, location, status, species_id, breed_id"
@@ -136,11 +140,11 @@ export async function getAnimalById(
     .eq("id", id)
     .single();
 
-  const { speciesMap, breedsMap } = await getLookupMaps();
-
-  if (animalResult.error || !animalResult.data) {
+  if (result.error || !result.data) {
     return undefined;
   }
+
+  const lookupMaps = await getLookupMaps();
 
   const eventResult = await supabase
     .from("animal_events")
@@ -148,27 +152,35 @@ export async function getAnimalById(
     .eq("animal_id", id)
     .order("event_date", { ascending: false });
 
-  const eventRows = eventResult.data ?? [];
-
-  const events: AnimalEvent[] = eventRows.map((event) => ({
+  const events: AnimalEvent[] = (eventResult.data || []).map((event) => ({
     date: event.event_date,
     type: event.event_type,
-    detail: event.detail ?? "",
+    detail: event.detail || "",
   }));
 
-  const row = animalResult.data as AnimalRow;
+  const row = result.data as AnimalRow;
 
   return {
-    ...mapAnimalRow(row, speciesMap, breedsMap),
+    ...mapAnimalRow(row, lookupMaps.speciesMap, lookupMaps.breedsMap),
     events,
   };
 }
 ```
 
-### Then run
+### Then save it
+
+In VS Code:
+
+**Ctrl + S**
+
+Then run:
 
 ```bash
 npm run build
 ```
 
-**Important:** If this still reports a **Syntax Error**, don't make another change. Paste the error from the **first line that says `./lib/data/repositories/animals.ts` through the `Caused by:` section**. At that point we'll check whether the actual file being built differs from what you're editing.
+### One important thing
+
+If you **still get a syntax error pointing at this file**, I don't want you to keep replacing code. At that point, we'll inspect the actual file encoding/characters or the build environment, because this code itself contains nothing syntactically unusual.
+
+Paste the next build output exactly as Vercel gives it.
