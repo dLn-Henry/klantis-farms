@@ -8,13 +8,13 @@ import { SITE_CONTENT } from "@/lib/site-config";
 import { categories } from "@/lib/data/mock/categories";
 
 const NAV_LINKS = [
-  { label: "Home", href: "/" },
-  { label: "Our Farm", href: "/farm" },
+  { label: "Home", href: "/", dropdown: false },
+  { label: "Our Farm", href: "/farm", dropdown: false },
   { label: "Shop", href: "/shop", dropdown: true },
-  { label: "Farming Practices", href: "/how-we-farm" },
-  { label: "Articles", href: "/journal" },
-  { label: "About Us", href: "/about" },
-  { label: "Contact", href: "/contact" },
+  { label: "Farming Practices", href: "/how-we-farm", dropdown: false },
+  { label: "Articles", href: "/journal", dropdown: false },
+  { label: "About Us", href: "/about", dropdown: false },
+  { label: "Contact", href: "/contact", dropdown: false },
 ] as const;
 
 export function SiteHeader() {
