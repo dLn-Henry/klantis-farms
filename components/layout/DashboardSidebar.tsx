@@ -12,7 +12,7 @@ import { SITE_CONTENT } from "@/lib/site-config";
 type NavItem = {
   label: string;
   href: string;
-  icon: React.ComponentType<{ size?: number; className?: string }>;
+  icon: React.ElementType;
   live?: boolean;
 };
 
