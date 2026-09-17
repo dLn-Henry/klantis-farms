@@ -31,18 +31,18 @@ function Field({
 }
 
 export function SettingsForm() {
-  const [name, setName] = useState(SITE_CONTENT.name);
-  const [tagline, setTagline] = useState(SITE_CONTENT.tagline);
-  const [announcementBar, setAnnouncementBar] = useState(SITE_CONTENT.announcementBar);
-  const [deliveryRegionNote, setDeliveryRegionNote] = useState(SITE_CONTENT.deliveryRegionNote);
-  const [phone, setPhone] = useState(SITE_CONTENT.phone);
-  const [email, setEmail] = useState(SITE_CONTENT.email);
-  const [address, setAddress] = useState(SITE_CONTENT.address);
-  const [hours, setHours] = useState(SITE_CONTENT.hours);
-  const [footerBlurb, setFooterBlurb] = useState(SITE_CONTENT.footerBlurb);
-  const [facebook, setFacebook] = useState(SITE_CONTENT.social.facebook);
-  const [instagram, setInstagram] = useState(SITE_CONTENT.social.instagram);
-  const [twitter, setTwitter] = useState(SITE_CONTENT.social.twitter);
+const [name, setName] = useState<string>(SITE_CONTENT.name);
+const [tagline, setTagline] = useState<string>(SITE_CONTENT.tagline);
+const [announcementBar, setAnnouncementBar] = useState<string>(SITE_CONTENT.announcementBar);
+const [deliveryRegionNote, setDeliveryRegionNote] = useState<string>(SITE_CONTENT.deliveryRegionNote);
+const [phone, setPhone] = useState<string>(SITE_CONTENT.phone);
+const [email, setEmail] = useState<string>(SITE_CONTENT.email);
+const [address, setAddress] = useState<string>(SITE_CONTENT.address);
+const [hours, setHours] = useState<string>(SITE_CONTENT.hours);
+const [footerBlurb, setFooterBlurb] = useState<string>(SITE_CONTENT.footerBlurb);
+const [facebook, setFacebook] = useState<string>(SITE_CONTENT.social.facebook);
+const [instagram, setInstagram] = useState<string>(SITE_CONTENT.social.instagram);
+const [twitter, setTwitter] = useState<string>(SITE_CONTENT.social.twitter);
   const [saved, setSaved] = useState(false);
 
   function handleSave(e: React.FormEvent) {
