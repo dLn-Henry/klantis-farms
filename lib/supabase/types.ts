@@ -26,11 +26,13 @@ export type Database = {
         };
         Insert: Partial<Database["public"]["Tables"]["profiles"]["Row"]> & { id: string };
         Update: Partial<Database["public"]["Tables"]["profiles"]["Row"]>;
+        Relationships: [];
       };
       organizations: {
         Row: { id: string; name: string; slug: string; status: string; created_at: string; updated_at: string };
         Insert: Partial<Database["public"]["Tables"]["organizations"]["Row"]>;
         Update: Partial<Database["public"]["Tables"]["organizations"]["Row"]>;
+        Relationships: [];
       };
       farms: {
         Row: {
@@ -41,26 +43,31 @@ export type Database = {
         };
         Insert: Partial<Database["public"]["Tables"]["farms"]["Row"]>;
         Update: Partial<Database["public"]["Tables"]["farms"]["Row"]>;
+        Relationships: [];
       };
       farm_members: {
         Row: { id: string; farm_id: string; user_id: string; role_id: string; status: string; joined_at: string };
         Insert: Partial<Database["public"]["Tables"]["farm_members"]["Row"]>;
         Update: Partial<Database["public"]["Tables"]["farm_members"]["Row"]>;
+        Relationships: [];
       };
       roles: {
         Row: { id: string; name: string; description: string | null };
         Insert: Partial<Database["public"]["Tables"]["roles"]["Row"]>;
         Update: Partial<Database["public"]["Tables"]["roles"]["Row"]>;
+        Relationships: [];
       };
       species: {
         Row: { id: string; name: string };
         Insert: Partial<Database["public"]["Tables"]["species"]["Row"]>;
         Update: Partial<Database["public"]["Tables"]["species"]["Row"]>;
+        Relationships: [];
       };
       breeds: {
         Row: { id: string; species_id: string; name: string };
         Insert: Partial<Database["public"]["Tables"]["breeds"]["Row"]>;
         Update: Partial<Database["public"]["Tables"]["breeds"]["Row"]>;
+        Relationships: [];
       };
       animals: {
         Row: {
@@ -71,6 +78,7 @@ export type Database = {
         };
         Insert: Partial<Database["public"]["Tables"]["animals"]["Row"]>;
         Update: Partial<Database["public"]["Tables"]["animals"]["Row"]>;
+        Relationships: [];
       };
       animal_events: {
         Row: {
@@ -79,11 +87,13 @@ export type Database = {
         };
         Insert: Partial<Database["public"]["Tables"]["animal_events"]["Row"]>;
         Update: Partial<Database["public"]["Tables"]["animal_events"]["Row"]>;
+        Relationships: [];
       };
       crop_types: {
         Row: { id: string; name: string };
         Insert: Partial<Database["public"]["Tables"]["crop_types"]["Row"]>;
         Update: Partial<Database["public"]["Tables"]["crop_types"]["Row"]>;
+        Relationships: [];
       };
       fields: {
         Row: {
@@ -93,11 +103,13 @@ export type Database = {
         };
         Insert: Partial<Database["public"]["Tables"]["fields"]["Row"]>;
         Update: Partial<Database["public"]["Tables"]["fields"]["Row"]>;
+        Relationships: [];
       };
       field_history: {
         Row: { id: string; field_id: string; season: string; crop: string; outcome: string | null; created_at: string };
         Insert: Partial<Database["public"]["Tables"]["field_history"]["Row"]>;
         Update: Partial<Database["public"]["Tables"]["field_history"]["Row"]>;
+        Relationships: [];
       };
       crop_cycles: {
         Row: {
@@ -108,6 +120,7 @@ export type Database = {
         };
         Insert: Partial<Database["public"]["Tables"]["crop_cycles"]["Row"]>;
         Update: Partial<Database["public"]["Tables"]["crop_cycles"]["Row"]>;
+        Relationships: [];
       };
       crop_activities: {
         Row: {
@@ -116,6 +129,7 @@ export type Database = {
         };
         Insert: Partial<Database["public"]["Tables"]["crop_activities"]["Row"]>;
         Update: Partial<Database["public"]["Tables"]["crop_activities"]["Row"]>;
+        Relationships: [];
       };
       harvests: {
         Row: {
@@ -125,6 +139,7 @@ export type Database = {
         };
         Insert: Partial<Database["public"]["Tables"]["harvests"]["Row"]>;
         Update: Partial<Database["public"]["Tables"]["harvests"]["Row"]>;
+        Relationships: [];
       };
       veterinary_reports: {
         Row: {
@@ -135,6 +150,7 @@ export type Database = {
         };
         Insert: Partial<Database["public"]["Tables"]["veterinary_reports"]["Row"]>;
         Update: Partial<Database["public"]["Tables"]["veterinary_reports"]["Row"]>;
+        Relationships: [];
       };
       inventory_items: {
         Row: {
@@ -143,6 +159,7 @@ export type Database = {
         };
         Insert: Partial<Database["public"]["Tables"]["inventory_items"]["Row"]>;
         Update: Partial<Database["public"]["Tables"]["inventory_items"]["Row"]>;
+        Relationships: [];
       };
       inventory_transactions: {
         Row: {
@@ -152,11 +169,13 @@ export type Database = {
         };
         Insert: Partial<Database["public"]["Tables"]["inventory_transactions"]["Row"]>;
         Update: Partial<Database["public"]["Tables"]["inventory_transactions"]["Row"]>;
+        Relationships: [];
       };
       product_categories: {
         Row: { id: string; slug: string; name: string; description: string | null };
         Insert: Partial<Database["public"]["Tables"]["product_categories"]["Row"]>;
         Update: Partial<Database["public"]["Tables"]["product_categories"]["Row"]>;
+        Relationships: [];
       };
       products: {
         Row: {
@@ -167,6 +186,7 @@ export type Database = {
         };
         Insert: Partial<Database["public"]["Tables"]["products"]["Row"]>;
         Update: Partial<Database["public"]["Tables"]["products"]["Row"]>;
+        Relationships: [];
       };
       customers: {
         Row: {
@@ -175,6 +195,7 @@ export type Database = {
         };
         Insert: Partial<Database["public"]["Tables"]["customers"]["Row"]>;
         Update: Partial<Database["public"]["Tables"]["customers"]["Row"]>;
+        Relationships: [];
       };
       orders: {
         Row: {
@@ -184,6 +205,7 @@ export type Database = {
         };
         Insert: Partial<Database["public"]["Tables"]["orders"]["Row"]>;
         Update: Partial<Database["public"]["Tables"]["orders"]["Row"]>;
+        Relationships: [];
       };
       order_items: {
         Row: {
@@ -192,6 +214,7 @@ export type Database = {
         };
         Insert: Partial<Database["public"]["Tables"]["order_items"]["Row"]>;
         Update: Partial<Database["public"]["Tables"]["order_items"]["Row"]>;
+        Relationships: [];
       };
       suppliers: {
         Row: {
@@ -201,11 +224,13 @@ export type Database = {
         };
         Insert: Partial<Database["public"]["Tables"]["suppliers"]["Row"]>;
         Update: Partial<Database["public"]["Tables"]["suppliers"]["Row"]>;
+        Relationships: [];
       };
       supplier_purchases: {
         Row: { id: string; supplier_id: string; farm_id: string; purchase_date: string; item: string; amount: number; created_at: string };
         Insert: Partial<Database["public"]["Tables"]["supplier_purchases"]["Row"]>;
         Update: Partial<Database["public"]["Tables"]["supplier_purchases"]["Row"]>;
+        Relationships: [];
       };
       equipment: {
         Row: {
@@ -215,6 +240,7 @@ export type Database = {
         };
         Insert: Partial<Database["public"]["Tables"]["equipment"]["Row"]>;
         Update: Partial<Database["public"]["Tables"]["equipment"]["Row"]>;
+        Relationships: [];
       };
       maintenance_records: {
         Row: {
@@ -223,6 +249,7 @@ export type Database = {
         };
         Insert: Partial<Database["public"]["Tables"]["maintenance_records"]["Row"]>;
         Update: Partial<Database["public"]["Tables"]["maintenance_records"]["Row"]>;
+        Relationships: [];
       };
       expenses: {
         Row: {
@@ -232,6 +259,7 @@ export type Database = {
         };
         Insert: Partial<Database["public"]["Tables"]["expenses"]["Row"]>;
         Update: Partial<Database["public"]["Tables"]["expenses"]["Row"]>;
+        Relationships: [];
       };
       income_records: {
         Row: {
@@ -240,6 +268,7 @@ export type Database = {
         };
         Insert: Partial<Database["public"]["Tables"]["income_records"]["Row"]>;
         Update: Partial<Database["public"]["Tables"]["income_records"]["Row"]>;
+        Relationships: [];
       };
       blog_posts: {
         Row: {
@@ -249,6 +278,7 @@ export type Database = {
         };
         Insert: Partial<Database["public"]["Tables"]["blog_posts"]["Row"]>;
         Update: Partial<Database["public"]["Tables"]["blog_posts"]["Row"]>;
+        Relationships: [];
       };
       audit_log: {
         Row: {
@@ -258,12 +288,16 @@ export type Database = {
         };
         Insert: Partial<Database["public"]["Tables"]["audit_log"]["Row"]>;
         Update: Partial<Database["public"]["Tables"]["audit_log"]["Row"]>;
+        Relationships: [];
       };
       settings: {
         Row: { id: string; farm_id: string; key: string; value: string | null; updated_at: string };
         Insert: Partial<Database["public"]["Tables"]["settings"]["Row"]>;
         Update: Partial<Database["public"]["Tables"]["settings"]["Row"]>;
+        Relationships: [];
       };
     };
+    Views: Record<string, never>;
+    Functions: Record<string, never>;
   };
 };

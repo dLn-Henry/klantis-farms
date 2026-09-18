@@ -4,14 +4,9 @@ import { notFound } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 import { DashboardTopbar } from "@/components/layout/DashboardTopbar";
 import { VetReportReview } from "@/components/dashboard/VetReportReview";
-import { getAllVetReports, getVetReportById } from "@/lib/data/repositories/vet-reports";
+import { getVetReportById } from "@/lib/data/repositories/vet-reports";
 
 type Props = { params: { id: string } };
-
-export async function generateStaticParams() {
-  const reports = await getAllVetReports();
-  return reports.map((r) => ({ id: r.id }));
-}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const report = await getVetReportById(params.id);

@@ -6,13 +6,14 @@ import {
   LayoutDashboard, Beef, Sprout, MapPin, Wheat, Stethoscope,
   Package, Wrench, Truck, ShoppingBag, Tag, Users, Wallet,
   FileBarChart, BarChart3, Newspaper, UserCog, Settings, ScrollText,
+  type LucideIcon,
 } from "lucide-react";
 import { SITE_CONTENT } from "@/lib/site-config";
 
 type NavItem = {
   label: string;
   href: string;
-  icon: React.ElementType;
+  icon: LucideIcon;
   live?: boolean;
 };
 

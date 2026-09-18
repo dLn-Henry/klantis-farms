@@ -4,17 +4,12 @@ import { notFound } from "next/navigation";
 import { ChevronLeft, Mail, Phone, MapPin, Calendar } from "lucide-react";
 import { DashboardTopbar } from "@/components/layout/DashboardTopbar";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { getAllCustomers, getCustomerById } from "@/lib/data/repositories/customers";
+import { getCustomerById } from "@/lib/data/repositories/customers";
 import { getAllOrders } from "@/lib/data/repositories/orders";
 import { orderTotal } from "@/lib/data/mock/orders";
 import { formatCurrency } from "@/lib/utils";
 
 type Props = { params: { id: string } };
-
-export async function generateStaticParams() {
-  const customers = await getAllCustomers();
-  return customers.map((c) => ({ id: c.id }));
-}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const customer = await getCustomerById(params.id);

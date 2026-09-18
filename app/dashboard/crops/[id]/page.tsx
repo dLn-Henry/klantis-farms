@@ -5,14 +5,9 @@ import { ChevronLeft } from "lucide-react";
 import { DashboardTopbar } from "@/components/layout/DashboardTopbar";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { CropDetailTabs } from "@/components/dashboard/CropDetailTabs";
-import { getAllCropCycles, getCropCycleById } from "@/lib/data/repositories/crop-cycles";
+import { getCropCycleById } from "@/lib/data/repositories/crop-cycles";
 
 type Props = { params: { id: string } };
-
-export async function generateStaticParams() {
-  const cycles = await getAllCropCycles();
-  return cycles.map((c) => ({ id: c.id }));
-}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const cycle = await getCropCycleById(params.id);

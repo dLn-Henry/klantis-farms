@@ -4,16 +4,11 @@ import { notFound } from "next/navigation";
 import { ChevronLeft, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { DashboardTopbar } from "@/components/layout/DashboardTopbar";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { getAllInventoryItems, getInventoryItemById } from "@/lib/data/repositories/inventory";
+import { getInventoryItemById } from "@/lib/data/repositories/inventory";
 import { getInventoryStatus } from "@/lib/data/mock/inventory";
 import { getAllHarvests } from "@/lib/data/repositories/harvests";
 
 type Props = { params: { id: string } };
-
-export async function generateStaticParams() {
-  const items = await getAllInventoryItems();
-  return items.map((i) => ({ id: i.id }));
-}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const item = await getInventoryItemById(params.id);

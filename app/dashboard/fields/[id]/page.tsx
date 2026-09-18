@@ -4,14 +4,9 @@ import { notFound } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 import { DashboardTopbar } from "@/components/layout/DashboardTopbar";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { getAllFields, getFieldById } from "@/lib/data/repositories/fields";
+import { getFieldById } from "@/lib/data/repositories/fields";
 
 type Props = { params: { id: string } };
-
-export async function generateStaticParams() {
-  const fields = await getAllFields();
-  return fields.map((f) => ({ id: f.id }));
-}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const field = await getFieldById(params.id);

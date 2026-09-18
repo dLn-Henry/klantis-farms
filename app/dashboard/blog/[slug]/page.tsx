@@ -4,14 +4,9 @@ import { notFound } from "next/navigation";
 import { ChevronLeft, ExternalLink } from "lucide-react";
 import { DashboardTopbar } from "@/components/layout/DashboardTopbar";
 import { BlogPostEditor } from "@/components/dashboard/BlogPostEditor";
-import { getAllPosts, getPostBySlug } from "@/lib/data/repositories/posts";
+import { getPostBySlug } from "@/lib/data/repositories/posts";
 
 type Props = { params: { slug: string } };
-
-export async function generateStaticParams() {
-  const posts = await getAllPosts();
-  return posts.map((p) => ({ slug: p.slug }));
-}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = await getPostBySlug(params.slug);
