@@ -4,15 +4,10 @@ import { notFound } from "next/navigation";
 import { ChevronLeft, Mail, Phone } from "lucide-react";
 import { DashboardTopbar } from "@/components/layout/DashboardTopbar";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { getAllSuppliers, getSupplierById } from "@/lib/data/repositories/suppliers";
+import { getSupplierById } from "@/lib/data/repositories/suppliers";
 import { formatCurrency } from "@/lib/utils";
 
 type Props = { params: { id: string } };
-
-export async function generateStaticParams() {
-  const suppliers = await getAllSuppliers();
-  return suppliers.map((s) => ({ id: s.id }));
-}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const supplier = await getSupplierById(params.id);

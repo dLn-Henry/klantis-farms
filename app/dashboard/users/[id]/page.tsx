@@ -4,15 +4,10 @@ import { notFound } from "next/navigation";
 import { ChevronLeft, CheckCircle2 } from "lucide-react";
 import { DashboardTopbar } from "@/components/layout/DashboardTopbar";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { getAllTeamMembers, getTeamMemberById } from "@/lib/data/repositories/users";
+import { getTeamMemberById } from "@/lib/data/repositories/users";
 import { ROLE_PERMISSIONS } from "@/lib/data/mock/users";
 
 type Props = { params: { id: string } };
-
-export async function generateStaticParams() {
-  const members = await getAllTeamMembers();
-  return members.map((m) => ({ id: m.id }));
-}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const member = await getTeamMemberById(params.id);

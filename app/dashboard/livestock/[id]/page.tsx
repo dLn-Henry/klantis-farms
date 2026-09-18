@@ -5,14 +5,9 @@ import { ChevronLeft } from "lucide-react";
 import { DashboardTopbar } from "@/components/layout/DashboardTopbar";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { AnimalDetailTabs } from "@/components/dashboard/AnimalDetailTabs";
-import { getAllAnimals, getAnimalById } from "@/lib/data/repositories/animals";
+import { getAnimalById } from "@/lib/data/repositories/animals";
 
 type Props = { params: { id: string } };
-
-export async function generateStaticParams() {
-  const animals = await getAllAnimals();
-  return animals.map((a) => ({ id: a.id }));
-}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const animal = await getAnimalById(params.id);

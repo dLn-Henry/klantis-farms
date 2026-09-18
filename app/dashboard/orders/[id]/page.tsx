@@ -5,17 +5,12 @@ import { ChevronLeft } from "lucide-react";
 import { DashboardTopbar } from "@/components/layout/DashboardTopbar";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { OrderStatusActions } from "@/components/dashboard/OrderStatusActions";
-import { getAllOrders, getOrderById } from "@/lib/data/repositories/orders";
+import { getOrderById } from "@/lib/data/repositories/orders";
 import { orderSubtotal, orderTotal } from "@/lib/data/mock/orders";
 import { getAllCustomers } from "@/lib/data/repositories/customers";
 import { formatCurrency } from "@/lib/utils";
 
 type Props = { params: { id: string } };
-
-export async function generateStaticParams() {
-  const orders = await getAllOrders();
-  return orders.map((o) => ({ id: o.id }));
-}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const order = await getOrderById(params.id);

@@ -4,16 +4,11 @@ import { notFound } from "next/navigation";
 import { ChevronLeft, ArrowRight } from "lucide-react";
 import { DashboardTopbar } from "@/components/layout/DashboardTopbar";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { getAllHarvests, getHarvestById } from "@/lib/data/repositories/harvests";
+import { getHarvestById } from "@/lib/data/repositories/harvests";
 import { getCropCycleById } from "@/lib/data/repositories/crop-cycles";
 import { getAllInventoryItems } from "@/lib/data/repositories/inventory";
 
 type Props = { params: { id: string } };
-
-export async function generateStaticParams() {
-  const harvests = await getAllHarvests();
-  return harvests.map((h) => ({ id: h.id }));
-}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const harvest = await getHarvestById(params.id);

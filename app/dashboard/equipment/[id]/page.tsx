@@ -4,15 +4,10 @@ import { notFound } from "next/navigation";
 import { ChevronLeft, Wrench } from "lucide-react";
 import { DashboardTopbar } from "@/components/layout/DashboardTopbar";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { getAllEquipment, getEquipmentById } from "@/lib/data/repositories/equipment";
+import { getEquipmentById } from "@/lib/data/repositories/equipment";
 import { formatCurrency } from "@/lib/utils";
 
 type Props = { params: { id: string } };
-
-export async function generateStaticParams() {
-  const equipment = await getAllEquipment();
-  return equipment.map((e) => ({ id: e.id }));
-}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const eq = await getEquipmentById(params.id);
