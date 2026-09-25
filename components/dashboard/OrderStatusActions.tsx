@@ -1,21 +1,47 @@
 "use client";
 
-import { useState } from "react";
-import { CheckCircle2, ArrowRight, XCircle } from "lucide-react";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { CheckCircle2, ArrowRight, XCircle, AlertCircle, Loader2 } from "lucide-react";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import type { OrderStatus } from "@/lib/data/mock/orders";
+import { updateOrderStatus } from "@/lib/actions/orders";
 
 const FLOW: OrderStatus[] = ["Pending", "Confirmed", "Processing", "Ready", "Delivered"];
 
-export function OrderStatusActions({ initialStatus }: { initialStatus: OrderStatus }) {
+export function OrderStatusActions({ orderId, initialStatus }: { orderId: string; initialStatus: OrderStatus }) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<OrderStatus>(initialStatus);
+
   const isCancelled = status === "Cancelled";
   const currentIndex = FLOW.indexOf(status);
   const nextStatus = !isCancelled && currentIndex < FLOW.length - 1 ? FLOW[currentIndex + 1] : null;
 
+  function handleUpdate(next: OrderStatus) {
+    setError(null);
+    startTransition(async () => {
+      const result = await updateOrderStatus(orderId, next);
+      if (!result.success) {
+        setError(result.error);
+        return;
+      }
+      setStatus(next);
+      router.refresh();
+    });
+  }
+
   return (
     <div className="bg-white border border-border rounded-md p-5">
       <h3 className="text-sm font-extrabold uppercase tracking-wide mb-5">Fulfillment Status</h3>
+
+      {error && (
+        <div className="flex items-center gap-2.5 bg-[#FDEDED] border border-[#F3C6C6] rounded-md px-3.5 py-3 mb-5">
+          <AlertCircle size={16} className="stroke-[#C62828] flex-shrink-0" />
+          <span className="text-xs font-semibold text-[#C62828]">{error}</span>
+        </div>
+      )}
 
       {isCancelled ? (
         <div className="flex items-center gap-2.5 text-[#C62828] text-sm font-semibold mb-5">
@@ -53,14 +79,15 @@ export function OrderStatusActions({ initialStatus }: { initialStatus: OrderStat
       {(nextStatus || !isCancelled) && (
         <div className="flex flex-wrap gap-3 mt-5">
           {nextStatus && (
-            <button onClick={() => setStatus(nextStatus)} className="btn-solid">
-              Mark as {nextStatus} <ArrowRight size={15} />
+            <button disabled={isPending} onClick={() => handleUpdate(nextStatus)} className="btn-solid disabled:opacity-60 disabled:cursor-not-allowed">
+              {isPending ? <Loader2 size={15} className="animate-spin" /> : <>Mark as {nextStatus} <ArrowRight size={15} /></>}
             </button>
           )}
           {status !== "Delivered" && !isCancelled && (
             <button
-              onClick={() => setStatus("Cancelled")}
-              className="inline-flex items-center gap-2 text-sm font-bold px-6 py-3.5 rounded-sm border border-border text-ink hover:border-[#C62828] hover:text-[#C62828]"
+              disabled={isPending}
+              onClick={() => handleUpdate("Cancelled")}
+              className="inline-flex items-center gap-2 text-sm font-bold px-6 py-3.5 rounded-sm border border-border text-ink hover:border-[#C62828] hover:text-[#C62828] disabled:opacity-60 disabled:cursor-not-allowed"
             >
               <XCircle size={15} /> Cancel Order
             </button>

@@ -79,7 +79,7 @@ export default async function OrderDetailPage({ params }: Props) {
             </div>
           </div>
 
-          <OrderStatusActions initialStatus={order.status} />
+          <OrderStatusActions orderId={order.id} initialStatus={order.status} />
         </div>
       </div>
     </>
