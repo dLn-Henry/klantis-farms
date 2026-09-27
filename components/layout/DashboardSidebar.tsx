@@ -6,6 +6,7 @@ import {
   LayoutDashboard, Beef, Sprout, MapPin, Wheat, Stethoscope,
   Package, Wrench, Truck, ShoppingBag, Tag, Users, Wallet,
   FileBarChart, BarChart3, Newspaper, UserCog, Settings, ScrollText,
+  ListChecks,
   type LucideIcon,
 } from "lucide-react";
 import { SITE_CONTENT } from "@/lib/site-config";
@@ -39,6 +40,10 @@ const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
       { label: "Equipment", href: "/dashboard/equipment", icon: Wrench, live: true },
       { label: "Suppliers", href: "/dashboard/suppliers", icon: Truck, live: true },
     ],
+  },
+  {
+    title: "Planning",
+    items: [{ label: "Tasks", href: "/dashboard/tasks", icon: ListChecks, live: true }],
   },
   {
     title: "Business",
