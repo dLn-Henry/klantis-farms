@@ -309,6 +309,11 @@ export type Database = {
       };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      next_farm_code: {
+        Args: { p_farm_id: string; p_prefix: string };
+        Returns: string;
+      };
+    };
   };
 };
