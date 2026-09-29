@@ -37,6 +37,10 @@ export default async function InventoryDetailPage({ params }: Props) {
         </div>
         <p className="text-sm text-ink-soft mb-7">{item.sku} · {item.category} · {item.location}</p>
 
+        <Link href={`/dashboard/inventory/log?item=${item.id}`} className="btn-solid inline-flex mb-8">
+          Log Movement
+        </Link>
+
         <div className="grid sm:grid-cols-3 gap-4 mb-8">
           <div className="bg-white border border-border rounded-md p-4">
             <span className="text-[11px] font-bold text-ink-soft uppercase tracking-wide">Current Stock</span>
