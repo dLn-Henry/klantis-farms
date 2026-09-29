@@ -115,3 +115,17 @@ export async function getAnimalById(id: string): Promise<Animal | undefined> {
 
   return { ...mapAnimalRow(row, speciesMap, breedsMap), events };
 }
+
+// Species with their breeds, for the "Add Animal" form's pickers.
+export async function getSpeciesWithBreeds(): Promise<{ id: string; name: string; breeds: { id: string; name: string }[] }[]> {
+  const supabase = createClient();
+  const [{ data: species }, { data: breeds }] = await Promise.all([
+    supabase.from("species").select("id, name").order("name"),
+    supabase.from("breeds").select("id, species_id, name").order("name"),
+  ]);
+  return (species ?? []).map((sp) => ({
+    id: sp.id,
+    name: sp.name,
+    breeds: (breeds ?? []).filter((b) => b.species_id === sp.id).map((b) => ({ id: b.id, name: b.name })),
+  }));
+}
