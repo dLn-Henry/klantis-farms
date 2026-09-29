@@ -20,7 +20,7 @@ export default async function HarvestsPage() {
             <h2 className="text-lg font-extrabold">Harvests</h2>
             <p className="text-sm text-ink-soft mt-0.5">Every harvest recorded, and where it went.</p>
           </div>
-          <button className="btn-solid"><Plus size={15} /> Record Harvest</button>
+          <Link href="/dashboard/harvests/new" className="btn-solid"><Plus size={15} /> Record Harvest</Link>
         </div>
 
         <div className="bg-white border border-border rounded-md overflow-hidden overflow-x-auto">

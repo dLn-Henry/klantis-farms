@@ -31,6 +31,7 @@ const STATUS_STYLES: Record<string, string> = {
   "Changes Requested": "bg-[#FDF3E3] text-[#B4801F]",
   "Low Stock": "bg-[#FDF3E3] text-[#B4801F]",
   Pending: "bg-[#FDF3E3] text-[#B4801F]",
+  "In Progress": "bg-[#EAF1F8] text-[#2878A8]",
   Processing: "bg-[#FDF3E3] text-[#B4801F]",
   Confirmed: "bg-[#FDF3E3] text-[#B4801F]",
   "Pending Payment": "bg-[#FDF3E3] text-[#B4801F]",

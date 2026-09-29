@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Stethoscope } from "lucide-react";
+import { Stethoscope, Plus } from "lucide-react";
 import { DashboardTopbar } from "@/components/layout/DashboardTopbar";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { getAllVetReports } from "@/lib/data/repositories/vet-reports";
@@ -16,9 +16,14 @@ export default async function VeterinaryPage() {
       <DashboardTopbar title="Veterinary" />
 
       <div className="p-6 lg:p-8">
-        <div className="mb-6">
-          <h2 className="text-lg font-extrabold">Veterinary Reports</h2>
-          <p className="text-sm text-ink-soft mt-0.5">Professional submissions become official animal records only after review.</p>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-lg font-extrabold">Veterinary Reports</h2>
+            <p className="text-sm text-ink-soft mt-0.5">Professional submissions become official animal records only after review.</p>
+          </div>
+          <Link href="/dashboard/veterinary/new" className="btn-solid">
+            <Plus size={15} /> Submit Report
+          </Link>
         </div>
 
         {pending.length > 0 && (

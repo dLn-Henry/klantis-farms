@@ -22,7 +22,7 @@ export default async function InventoryPage() {
             <h2 className="text-lg font-extrabold">Inventory</h2>
             <p className="text-sm text-ink-soft mt-0.5">Stock levels, derived from actual movements — not typed in by hand.</p>
           </div>
-          <button className="btn-solid"><Plus size={15} /> Record Movement</button>
+          <Link href="/dashboard/inventory/log" className="btn-solid"><Plus size={15} /> Record Movement</Link>
         </div>
 
         {lowStock.length > 0 && (

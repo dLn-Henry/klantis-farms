@@ -20,9 +20,9 @@ export default async function LivestockPage() {
             <h2 className="text-lg font-extrabold">Animals</h2>
             <p className="text-sm text-ink-soft mt-0.5">Manage and monitor animals across the farm.</p>
           </div>
-          <button className="btn-solid">
+          <Link href="/dashboard/livestock/new" className="btn-solid">
             <Plus size={15} /> Add Animal
-          </button>
+          </Link>
         </div>
 
         <div className="flex items-center gap-3 mb-5">

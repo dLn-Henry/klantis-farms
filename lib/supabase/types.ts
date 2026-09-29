@@ -152,6 +152,17 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["veterinary_reports"]["Row"]>;
         Relationships: [];
       };
+      tasks: {
+        Row: {
+          id: string; farm_id: string; title: string; description: string | null; priority: string;
+          status: string; due_date: string | null; assigned_to: string | null; created_by: string | null;
+          completed_at: string | null; related_entity_type: string | null; related_entity_id: string | null;
+          created_at: string; updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["tasks"]["Row"]>;
+        Update: Partial<Database["public"]["Tables"]["tasks"]["Row"]>;
+        Relationships: [];
+      };
       inventory_items: {
         Row: {
           id: string; farm_id: string; sku: string; name: string; category: string; quantity: number;
@@ -298,6 +309,11 @@ export type Database = {
       };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      next_farm_code: {
+        Args: { p_farm_id: string; p_prefix: string };
+        Returns: string;
+      };
+    };
   };
 };

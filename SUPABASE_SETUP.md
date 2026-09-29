@@ -101,23 +101,32 @@ This phase added `@supabase/supabase-js` and `@supabase/ssr`.
 
 **Real now:**
 - Authentication (login, register, logout, password reset) — via Supabase Auth
-- Route protection on `/dashboard` — via `middleware.ts`
-- The full database schema with Row-Level Security, matching every module
-  that's been built
+- Route protection on `/dashboard` — via `middleware.ts`, and every
+  `/dashboard/*` page renders dynamically per-request (never statically
+  cached — this data is private and farm-scoped)
+- The full database schema with Row-Level Security and role-based
+  authorization (not just farm membership), matching every module below
+- Reads: Livestock, Crops, Fields, Harvests, Veterinary, Inventory,
+  Orders, Customers, Tasks
+- Writes: Add Animal, Record Harvest, Submit Veterinary Report, Create
+  Task, veterinary report review (approve/reject/request changes), order
+  fulfillment status. Each of these is backed by a database rule, not
+  just a UI check — e.g. a veterinarian genuinely cannot approve their
+  own report, and payment_status genuinely cannot be set by any
+  authenticated client role.
 
-**Still mock data** (repositories in `lib/data/repositories/` still read
-from `lib/data/mock/` arrays, not the database):
-- Livestock, Crops, Fields, Harvests, Veterinary
-- Inventory
-- Products, Orders, Customers
-- Suppliers, Equipment, Finance
-- Reports, Analytics
-- Blog, Users, Audit Log, Settings
+**Still mock data:**
+- Equipment, Finance, Products, Suppliers, Users, Audit Log, Blog,
+  Settings — reads only, nothing writes yet
+- Checkout / order creation doesn't exist in any form yet, mock or real
 
-This is intentional and staged on purpose. Every repository function is
-already `async` specifically so that converting one to a real Supabase
-query is a contained change to that single file — no page or component
-needs to change when it happens. That conversion is the next phase.
+Converting a repository to real Supabase is a contained change to that
+one file, by design. But treat "reads convert cleanly" and "writes are
+safe" as two different jobs — every write path in this project so far
+needed a database-level rule alongside it (see migrations 0008-0013),
+found by actually trying to break it, not by inspection. Budget for that
+when converting the next one, especially anything touching money
+(orders/finance) or an approval (nothing else has one yet).
 
 ## A note on verification
 
