@@ -83,3 +83,10 @@ export async function getCropCycleById(id: string): Promise<CropCycle | undefine
 
   return { ...mapCropCycleRow(data, fieldMap, cropTypeMap), events };
 }
+
+// Crop types, for the "New Crop Cycle" form's picker.
+export async function getCropTypeOptions(): Promise<{ id: string; name: string }[]> {
+  const supabase = createClient();
+  const { data } = await supabase.from("crop_types").select("id, name").order("name");
+  return data ?? [];
+}
