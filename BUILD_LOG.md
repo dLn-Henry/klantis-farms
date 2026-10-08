@@ -22,6 +22,7 @@ the same commit whenever something in this list changes.
 | `0011_insert_guards.sql` | BEFORE INSERT guards: veterinary_reports/harvests can't be inserted pre-approved or with a forged submitter/recorder; tasks can't be created with a forged `created_by` or assigned to someone outside the farm. All skip when `auth.uid()` is null (service_role/migrations). |
 | `0012_cross_farm_references.sql` | **`guard_same_farm_reference()`** — one generic trigger, parameterized per table, that checks a referencing column's target row belongs to the same farm. Attached to all 10 FK relationships between farm-scoped tables (found by querying the catalog, not by guessing). Also: inventory transactions lock the row and refuse to go negative (`SELECT ... FOR UPDATE`, verified under real concurrency), forged `created_by` rejected. search_path pinned on every SECURITY DEFINER function. **Any new FK between two farm-scoped tables needs a `guard_ref_*` trigger added here, same pattern.** |
 | `0013_numeric_sanity_checks.sql` | CHECK constraints (NOT VALID) on every numeric column that had none — amounts > 0, quantities, coordinates, rating range. **Check this file before adding a new numeric column elsewhere; add a constraint here if it doesn't already exist.** |
+| `0014_audit_coverage.sql` | **`log_audit_event()`** — one generic, parameterized AFTER trigger (`TG_ARGV[0]` = entity label, `TG_ARGV[1]` = label column) attached to harvests, orders, tasks, crop_cycles, animals, suppliers, equipment, expenses, income_records, inventory_transactions, maintenance_records. Logs minimal facts only (what/to what/by whom/status transition) — never a row snapshot, because expenses/orders carry money and the log is readable. Update-without-status-change is not logged. Read access to audit_log narrowed from any farm member to Farm Owner/Manager. **Any new write-path table should get an `audit_*` trigger using this function.** |
 
 ## Established patterns — reuse these, don't reinvent
 
@@ -46,9 +47,9 @@ Note: this sandbox's Postgres install and the cloned repo do not persist between
 
 ## Status: real vs mock
 
-**Real (Supabase, RLS-backed, tested)**: animals, crop-cycles, customers, equipment, fields, finance, harvests, inventory, orders, suppliers, tasks, vet-reports.
+**Real (Supabase, RLS-backed, tested)**: animals, audit-log, crop-cycles, customers, equipment, fields, finance, harvests, inventory, orders, suppliers, tasks, vet-reports.
 
-**Still mock**: `audit-log.ts`, `posts.ts` (blog), `products.ts`, `users.ts`.
+**Still mock**: `posts.ts` (blog), `products.ts`, `users.ts`. (Settings is also unconverted — it's a form with no backend, honest about it in the UI.)
 
 **Write paths that exist**: Add Animal, Record Harvest, Log Movement (inventory), Submit + Review Veterinary Report, Create + Update Task status, Create Crop Cycle, Add Expense, Add Income, Add Supplier, Add Equipment, Log Maintenance, Update Order (fulfillment) Status.
 
