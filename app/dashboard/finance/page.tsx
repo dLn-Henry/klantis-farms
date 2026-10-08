@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { TrendingUp, TrendingDown, DollarSign } from "lucide-react";
+import { TrendingUp, TrendingDown, DollarSign, Plus } from "lucide-react";
 import { DashboardTopbar } from "@/components/layout/DashboardTopbar";
 import { getAllExpenses, getAllIncome } from "@/lib/data/repositories/finance";
-import { totalExpenses, totalIncome } from "@/lib/data/mock/finance";
 import { formatCurrency } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Finance" };
@@ -11,8 +10,10 @@ export const metadata: Metadata = { title: "Finance" };
 export default async function FinancePage() {
   const expenses = await getAllExpenses();
   const income = await getAllIncome();
-  const revenue = totalIncome();
-  const spent = totalExpenses();
+  // Computed from the same data rendered below, not a separate mock
+  // source -- these numbers can never silently disagree with the list.
+  const revenue = income.reduce((sum, i) => sum + i.amount, 0);
+  const spent = expenses.reduce((sum, e) => sum + e.amount, 0);
   const net = revenue - spent;
 
   return (
@@ -20,9 +21,20 @@ export default async function FinancePage() {
       <DashboardTopbar title="Finance" />
 
       <div className="p-6 lg:p-8">
-        <div className="mb-6">
-          <h2 className="text-lg font-extrabold">Finance Overview</h2>
-          <p className="text-sm text-ink-soft mt-0.5">Revenue and expenses recorded so far this season.</p>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-lg font-extrabold">Finance Overview</h2>
+            <p className="text-sm text-ink-soft mt-0.5">Revenue and expenses recorded so far this season.</p>
+          </div>
+          <div className="flex gap-3">
+            <Link href="/dashboard/finance/income/new" className="btn-solid"><Plus size={15} /> Add Income</Link>
+            <Link
+              href="/dashboard/finance/expenses/new"
+              className="inline-flex items-center gap-2 text-sm font-bold px-6 py-3.5 rounded-sm border border-border text-ink hover:border-green"
+            >
+              <Plus size={15} /> Add Expense
+            </Link>
+          </div>
         </div>
 
         <div className="grid sm:grid-cols-3 gap-5 mb-8">
