@@ -5,7 +5,10 @@ import { ChevronLeft, CheckCircle2 } from "lucide-react";
 import { DashboardTopbar } from "@/components/layout/DashboardTopbar";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { getTeamMemberById } from "@/lib/data/repositories/users";
-import { ROLE_PERMISSIONS } from "@/lib/data/mock/users";
+import { getMyRoleName } from "@/lib/data/current-farm";
+import { ROLE_DESCRIPTIONS } from "@/lib/data/role-descriptions";
+import { TeamMemberControls } from "@/components/dashboard/TeamMemberControls";
+import { createClient } from "@/lib/supabase/server";
 
 type Props = { params: { id: string } };
 
@@ -18,7 +21,13 @@ export default async function UserDetailPage({ params }: Props) {
   const member = await getTeamMemberById(params.id);
   if (!member) return notFound();
 
-  const permissions = ROLE_PERMISSIONS[member.role];
+  const permissions = ROLE_DESCRIPTIONS[member.role];
+
+  // Controls are only *shown* to owners, and not for your own row. That is a
+  // convenience; the database functions enforce the same rules regardless.
+  const supabase = createClient();
+  const [myRole, { data: { user } }] = await Promise.all([getMyRoleName(), supabase.auth.getUser()]);
+  const canManage = myRole === "Farm Owner" && user?.id !== member.userId;
 
   return (
     <>
@@ -35,7 +44,9 @@ export default async function UserDetailPage({ params }: Props) {
         </div>
         <p className="text-sm text-ink-soft mb-7">{member.email} · {member.role}</p>
 
-        <h3 className="text-sm font-extrabold uppercase tracking-wide mb-4">Permissions — {member.role}</h3>
+        {canManage && <TeamMemberControls memberId={member.id} role={member.role} status={member.status} />}
+
+        <h3 className="text-sm font-extrabold uppercase tracking-wide mb-4">What {member.role} can do</h3>
         <div className="bg-white border border-border rounded-md overflow-hidden">
           {permissions.map((p, i) => (
             <div key={i} className="flex items-center gap-3 px-5 py-4 border-b border-border last:border-b-0">
