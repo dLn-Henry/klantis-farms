@@ -106,7 +106,13 @@ begin
   end if;
   if new.status = 'Published' and
      (TG_OP = 'INSERT' or old.status <> 'Published' or new.published_at is null) then
-    new.published_at := now();
+    -- A Scheduled post whose time already passed was already live to the public;
+    -- promoting it to Published keeps its original date instead of resetting it.
+    if TG_OP = 'UPDATE' and old.status = 'Scheduled' and old.published_at <= now() then
+      new.published_at := old.published_at;
+    else
+      new.published_at := now();
+    end if;
   end if;
 
   return new;
