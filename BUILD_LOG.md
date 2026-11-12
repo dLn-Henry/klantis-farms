@@ -24,6 +24,7 @@ the same commit whenever something in this list changes.
 | `0013_numeric_sanity_checks.sql` | CHECK constraints (NOT VALID) on every numeric column that had none — amounts > 0, quantities, coordinates, rating range. **Check this file before adding a new numeric column elsewhere; add a constraint here if it doesn't already exist.** |
 | `0014_audit_coverage.sql` | **`log_audit_event()`** — one generic, parameterized AFTER trigger (`TG_ARGV[0]` = entity label, `TG_ARGV[1]` = label column) attached to harvests, orders, tasks, crop_cycles, animals, suppliers, equipment, expenses, income_records, inventory_transactions, maintenance_records. Logs minimal facts only (what/to what/by whom/status transition) — never a row snapshot, because expenses/orders carry money and the log is readable. Update-without-status-change is not logged. Read access to audit_log narrowed from any farm member to Farm Owner/Manager. **Any new write-path table should get an `audit_*` trigger using this function.** |
 | `0015_team_management.sql` | **Closed a hole in 0010:** `next_farm_code` had no membership check and was executable by PUBLIC, so a worker on one farm (or an anonymous visitor) could burn another farm's numbering and spam junk prefix rows. Now: farm-membership check, fixed prefix allow-list (**add new prefixes in that function**), EXECUTE revoked from public/anon. **Team management as database functions** — `list_farm_team`, `add_farm_member`, `set_member_role`, `set_member_status` — instead of table policies: only a Farm Owner can add/re-role/suspend; nobody can change their own role or status; a farm always keeps one active owner; every change is audit-logged; emails only shown to owner/manager. `farm_members` itself still has NO client write policy (verified a direct UPDATE/INSERT is refused). |
+| `0016_blog_hardening.sql` | **Blog.** Public read = Published, or Scheduled whose `published_at` has passed (computed in the policy at query time, no cron). Old `for all` policy split into INSERT/UPDATE only; DELETE revoked. `guard_blog_post()` trigger: anyone on the farm can write Drafts; anything that is, was, or becomes Published/Scheduled needs Farm Owner/Manager; Scheduled requires a date; Published auto-dates (a past-due Scheduled post keeps its date); author can't be forged, farm/author immutable. `author_name` is a trigger snapshot via `safe_author_name()` so anonymous visitors never read `profiles` -- it **never returns an email** (`handle_new_user` in 0001 defaults `display_name` to the email, so the snapshot uses first+last name, else a display_name without `@`, else "Farm team"). NOT VALID CHECKs: slug format/length/`new` reserved, title/excerpt/body/category sizes. Audited via `log_audit_event('Blog Post','title')`. |
 
 ## Established patterns — reuse these, don't reinvent
 
@@ -51,11 +52,11 @@ Note: this sandbox's Postgres install and the cloned repo do not persist between
 
 ## Status: real vs mock
 
-**Real (Supabase, RLS-backed, tested)**: animals, audit-log, crop-cycles, customers, equipment, fields, finance, harvests, inventory, orders, suppliers, tasks, users (team), vet-reports.
+**Real (Supabase, RLS-backed, tested)**: posts (blog), animals, audit-log, crop-cycles, customers, equipment, fields, finance, harvests, inventory, orders, suppliers, tasks, users (team), vet-reports.
 
-**Still mock**: `posts.ts` (blog), `products.ts`. (Settings is also unconverted — it's a form with no backend, honest about it in the UI.)
+**Still mock**: `products.ts`. (Settings is also unconverted — it's a form with no backend, honest about it in the UI.)
 
-**Write paths that exist**: Add Animal, Record Harvest, Log Movement (inventory), Submit + Review Veterinary Report, Create + Update Task status, Add Team Member / Change Role / Suspend-Reactivate (owner only), Create Crop Cycle, Add Expense, Add Income, Add Supplier, Add Equipment, Log Maintenance, Update Order (fulfillment) Status.
+**Write paths that exist**: Add Animal, Record Harvest, Log Movement (inventory), Submit + Review Veterinary Report, Create + Update Task status, Add Team Member / Change Role / Suspend-Reactivate (owner only), Create Crop Cycle, Create + Edit Blog Post (publish/schedule gated to Owner/Manager), Add Expense, Add Income, Add Supplier, Add Equipment, Log Maintenance, Update Order (fulfillment) Status.
 
 **Doesn't exist in any form**: checkout / order creation. Products and the public marketplace are still mock data end to end. Converting Products needs the `product_inventory_sources` linkage (spec: a product's availability should derive from inventory, not be typed in separately) done as part of the conversion, not after — flagged here so it isn't done the easy-but-wrong way.
 
@@ -64,3 +65,11 @@ Note: this sandbox's Postgres install and the cloned repo do not persist between
 - It tells an owner whether an email has an account ("No account found..."), so a farm owner can check whether an address is registered. Acceptable for trusted owners; revisit before opening farm creation to the public.
 - "At least one active owner" is enforced as defense in depth but can't currently be triggered through the normal paths (an acting owner can't modify themselves, so another active owner always exists). It guards against future paths.
 - Role descriptions in the UI (`lib/data/role-descriptions.ts`) list only what is genuinely enforced. Most per-module permissions beyond the approvals above are NOT enforced yet — every member can record data in every module of their farm.
+
+## Blog notes
+
+- **Two clients, on purpose.** Public journal pages use `lib/supabase/public.ts` (cookie-less, anonymous). Dashboard reads use the session client and **filter by the member's own farm_id explicitly**, because live posts are world-readable and would otherwise leak other farms' posts into the dashboard.
+- Public pages are `force-dynamic` so builds never need the database, and a post going live/unpublished shows immediately.
+- Public reads never select `author_id`/`farm_id`.
+- **No `dangerouslySetInnerHTML` anywhere** (checked): post bodies render as plain text paragraphs, so stored XSS can't execute. Keep it that way; if a rich-text renderer is ever added it must sanitize.
+- Slug is generated server-side from the title and never changes on edit (links stay valid). Single-farm assumption: the public journal lists all live posts; add a farm filter when a second farm publishes.

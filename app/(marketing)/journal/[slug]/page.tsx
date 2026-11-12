@@ -3,27 +3,26 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { PhotoSlot } from "@/components/ui/PhotoSlot";
-import { getPublishedPosts, getPostBySlug, getRelatedPosts } from "@/lib/data/repositories/posts";
+import { getPublishedPostBySlug, getRelatedPosts } from "@/lib/data/repositories/posts";
 
 type Props = { params: { slug: string } };
 
-export async function generateStaticParams() {
-  const posts = await getPublishedPosts();
-  return posts.map((p) => ({ slug: p.slug }));
-}
+// Always rendered per request: a post can be published, scheduled to go live,
+// or unpublished at any time, and the build must not depend on the database.
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const post = await getPostBySlug(params.slug);
+  const post = await getPublishedPostBySlug(params.slug);
   return { title: post?.title ?? "Farm Journal" };
 }
 
 export default async function ArticlePage({ params }: Props) {
-  const post = await getPostBySlug(params.slug);
-  // Draft/Scheduled posts exist for the dashboard preview but should never
-  // be reachable on the public site, even by someone guessing the URL.
-  if (!post || post.status !== "Published") return notFound();
+  // Anonymous query: drafts and not-yet-live scheduled posts are invisible to
+  // it at the database level, so guessing a URL can't reveal one.
+  const post = await getPublishedPostBySlug(params.slug);
+  if (!post) return notFound();
 
-  const related = await getRelatedPosts(post.slug, 3);
+  const related = await getRelatedPosts(post.slug, 3, post.category);
 
   return (
     <>

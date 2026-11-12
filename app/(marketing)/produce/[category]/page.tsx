@@ -11,6 +11,8 @@ import { formatCurrency } from "@/lib/utils";
 
 type Props = { params: { category: string } };
 
+export const dynamic = "force-dynamic";
+
 export function generateStaticParams() {
   return categories.map((c) => ({ category: c.slug }));
 }

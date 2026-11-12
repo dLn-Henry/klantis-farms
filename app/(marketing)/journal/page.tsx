@@ -5,6 +5,8 @@ import { PageIntro } from "@/components/marketing/PageIntro";
 import { PhotoSlot } from "@/components/ui/PhotoSlot";
 import { getPublishedPosts } from "@/lib/data/repositories/posts";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Farm Journal",
   description: "Notes from the farm — livestock, crops, and how we run things day to day.",
@@ -29,6 +31,12 @@ export default async function JournalPage() {
       <section className="py-16">
         <div className="max-w-[1280px] mx-auto px-10 grid lg:grid-cols-[2fr_1fr] gap-14 items-start">
           <div>
+            {!featured && (
+              <div className="bg-surface rounded-2xl p-10 text-center text-ink-soft">
+                No articles have been published yet. Check back soon.
+              </div>
+            )}
+            {featured && (
             <div className="grid md:grid-cols-2 gap-9 bg-surface rounded-2xl p-8 mb-9 items-center">
               <PhotoSlot label={`Photo — ${featured.title.slice(0, 28)}`} className="h-[240px] rounded-lg" />
               <div>
@@ -40,6 +48,7 @@ export default async function JournalPage() {
                 </Link>
               </div>
             </div>
+            )}
 
             <div className="grid sm:grid-cols-2 gap-6">
               {rest.map((post) => (

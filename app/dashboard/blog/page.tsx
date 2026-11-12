@@ -6,6 +6,7 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { getAllPosts } from "@/lib/data/repositories/posts";
 
 export const metadata: Metadata = { title: "Blog" };
+export const dynamic = "force-dynamic";
 
 export default async function BlogManagementPage() {
   const posts = await getAllPosts();
@@ -20,7 +21,7 @@ export default async function BlogManagementPage() {
             <h2 className="text-lg font-extrabold">Farm Journal Posts</h2>
             <p className="text-sm text-ink-soft mt-0.5">What's published, drafted, or scheduled on the public Farm Journal.</p>
           </div>
-          <button className="btn-solid"><Plus size={15} /> New Post</button>
+          <Link href="/dashboard/blog/new" className="btn-solid"><Plus size={15} /> New Post</Link>
         </div>
 
         <div className="bg-white border border-border rounded-md overflow-hidden overflow-x-auto">
@@ -36,6 +37,13 @@ export default async function BlogManagementPage() {
               </tr>
             </thead>
             <tbody>
+              {posts.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-5 py-10 text-center text-ink-soft">
+                    No posts yet. Create your first Farm Journal post.
+                  </td>
+                </tr>
+              )}
               {posts.map((p) => (
                 <tr key={p.slug} className="border-b border-border last:border-b-0 hover:bg-surface">
                   <td className="px-5 py-3.5 font-bold">{p.title}</td>

@@ -284,7 +284,7 @@ export type Database = {
       blog_posts: {
         Row: {
           id: string; farm_id: string | null; slug: string; title: string; category: string | null;
-          excerpt: string | null; body: string | null; author_id: string | null; reading_time: string | null;
+          excerpt: string | null; body: string | null; author_id: string | null; author_name: string | null; reading_time: string | null;
           status: string; published_at: string | null; created_at: string; updated_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["blog_posts"]["Row"]>;
