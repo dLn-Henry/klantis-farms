@@ -5,6 +5,7 @@ import { ChevronLeft, ExternalLink } from "lucide-react";
 import { DashboardTopbar } from "@/components/layout/DashboardTopbar";
 import { BlogPostEditor } from "@/components/dashboard/BlogPostEditor";
 import { getPostBySlug } from "@/lib/data/repositories/posts";
+import { getMyRoleName } from "@/lib/data/current-farm";
 
 type Props = { params: { slug: string } };
 
@@ -16,6 +17,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function BlogPostEditPage({ params }: Props) {
   const post = await getPostBySlug(params.slug);
   if (!post) return notFound();
+  const role = await getMyRoleName();
+  const canPublish = role === "Farm Owner" || role === "Farm Manager";
 
   return (
     <>
@@ -35,7 +38,7 @@ export default async function BlogPostEditPage({ params }: Props) {
 
         <h2 className="text-xl font-extrabold mb-7">Edit Post</h2>
 
-        <BlogPostEditor post={post} />
+        <BlogPostEditor post={post} canPublish={canPublish} />
       </div>
     </>
   );
