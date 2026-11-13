@@ -34,33 +34,42 @@ Paste your Project URL and anon key into `.env.local`.
 
 ## 4. Run the database migrations
 
-In your Supabase project dashboard, go to **SQL Editor**, and run each file
-in `supabase/migrations/` **in order** (the numbers matter — later files
-depend on tables created by earlier ones):
+In your Supabase project dashboard, go to **SQL Editor**. Open each file in
+`supabase/migrations/`, paste it in, click **Run**, and **do them one at a
+time, in numeric order**. Later files depend on earlier ones. If one errors,
+stop and read the error; don't skip ahead.
 
-1. `0001_core.sql`
-2. `0002_farm_records.sql`
-3. `0003_inventory.sql`
-4. `0004_commerce.sql`
-5. `0005_business_ops.sql`
-6. `0006_content_and_system.sql`
+Run **every** file, `0001` through `0016` (see `BUILD_LOG.md` for what each
+one does). `0007` is safe to run even if you've effectively got it already
+(it is idempotent).
 
-**If you're setting up fresh, stop here — you don't need `0007`.** It's
-already folded into files 0001, 0002 and 0004 above. `0007_rls_patch_reference_tables.sql`
-only exists for the case where you'd already run 0001-0006 before a fix was
-made to them (5 reference tables — `roles`, `species`, `breeds`,
-`crop_types`, `product_categories` — were initially missing Row-Level
-Security entirely, which under Supabase's default grants would have let
-anyone with the public anon key modify or delete that data directly). If
-that's your situation, run `0007` now and you're caught up.
+> **Why all of them matters.** The app calls database functions such as
+> `next_farm_code`, `list_farm_team` and `add_farm_member`, and relies on
+> tables like `tasks`. Those are created by `0008`-`0016`. If only the
+> early files were run, saving a harvest, vet report, crop cycle, supplier,
+> equipment item or task fails with:
+> *"Could not find the function public.next_farm_code(p_farm_id, p_prefix)
+> in the schema cache."*
 
-Paste each file's contents into the SQL Editor and click **Run**. If
-something errors, stop and read the error — don't skip ahead, since later
-files reference tables from earlier ones.
+### Already ran some of them? Check where you are
 
-Alternatively, if you have the Supabase CLI installed and your project
-linked (`npx supabase link`), you can run `npx supabase db push` to apply
-all migrations at once.
+Paste `supabase/verify_schema.sql` into the SQL Editor and run it. It is
+read-only and lists every missing table, function, trigger and column. An
+empty list (just an `OK` row) means you're fully caught up. Run the missing
+migrations in order, then run it again.
+
+### If the error persists after everything is applied
+
+Supabase's API layer can hold a stale copy of the schema. Run once:
+
+```sql
+notify pgrst, 'reload schema';
+```
+
+(or Dashboard -> Settings -> API -> reload schema cache).
+
+Alternatively, with the Supabase CLI installed and the project linked
+(`npx supabase link`), `npx supabase db push` applies all migrations at once.
 
 ## 5. Load the seed data
 
@@ -99,42 +108,7 @@ This phase added `@supabase/supabase-js` and `@supabase/ssr`.
 
 ## What's connected vs. still mock
 
-**Real now:**
-- Authentication (login, register, logout, password reset) — via Supabase Auth
-- Route protection on `/dashboard` — via `middleware.ts`, and every
-  `/dashboard/*` page renders dynamically per-request (never statically
-  cached — this data is private and farm-scoped)
-- The full database schema with Row-Level Security and role-based
-  authorization (not just farm membership), matching every module below
-- Reads: Livestock, Crops, Fields, Harvests, Veterinary, Inventory,
-  Orders, Customers, Tasks
-- Writes: Add Animal, Record Harvest, Submit Veterinary Report, Create
-  Task, veterinary report review (approve/reject/request changes), order
-  fulfillment status. Each of these is backed by a database rule, not
-  just a UI check — e.g. a veterinarian genuinely cannot approve their
-  own report, and payment_status genuinely cannot be set by any
-  authenticated client role.
-
-**Still mock data:**
-- Equipment, Finance, Products, Suppliers, Users, Audit Log, Blog,
-  Settings — reads only, nothing writes yet
-- Checkout / order creation doesn't exist in any form yet, mock or real
-
-Converting a repository to real Supabase is a contained change to that
-one file, by design. But treat "reads convert cleanly" and "writes are
-safe" as two different jobs — every write path in this project so far
-needed a database-level rule alongside it (see migrations 0008-0013),
-found by actually trying to break it, not by inspection. Budget for that
-when converting the next one, especially anything touching money
-(orders/finance) or an approval (nothing else has one yet).
-
-## A note on verification
-
-I can't install these packages or run this against a live Supabase project
-in the environment I'm building in — no network access. Everything here is
-checked as thoroughly as I can without that: the SQL is written carefully
-against standard PostgreSQL/Supabase patterns, the TypeScript compiles
-structurally (imports resolve, brackets balance), and the RLS policies
-follow the same "farm membership gates access" pattern throughout. But the
-real test is you actually running the migrations and trying to log in —
-please tell me exactly what breaks if something does.
+See **`BUILD_LOG.md` -> "Status: real vs mock"** -- it is the maintained,
+up-to-date list. In short: everything in the dashboard except Products and
+Settings is backed by Supabase with RLS; the public shop/products and
+checkout are not yet real.
