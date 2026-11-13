@@ -26,6 +26,17 @@ the same commit whenever something in this list changes.
 | `0015_team_management.sql` | **Closed a hole in 0010:** `next_farm_code` had no membership check and was executable by PUBLIC, so a worker on one farm (or an anonymous visitor) could burn another farm's numbering and spam junk prefix rows. Now: farm-membership check, fixed prefix allow-list (**add new prefixes in that function**), EXECUTE revoked from public/anon. **Team management as database functions** — `list_farm_team`, `add_farm_member`, `set_member_role`, `set_member_status` — instead of table policies: only a Farm Owner can add/re-role/suspend; nobody can change their own role or status; a farm always keeps one active owner; every change is audit-logged; emails only shown to owner/manager. `farm_members` itself still has NO client write policy (verified a direct UPDATE/INSERT is refused). |
 | `0016_blog_hardening.sql` | **Blog.** Public read = Published, or Scheduled whose `published_at` has passed (computed in the policy at query time, no cron). Old `for all` policy split into INSERT/UPDATE only; DELETE revoked. `guard_blog_post()` trigger: anyone on the farm can write Drafts; anything that is, was, or becomes Published/Scheduled needs Farm Owner/Manager; Scheduled requires a date; Published auto-dates (a past-due Scheduled post keeps its date); author can't be forged, farm/author immutable. `author_name` is a trigger snapshot via `safe_author_name()` so anonymous visitors never read `profiles` -- it **never returns an email** (`handle_new_user` in 0001 defaults `display_name` to the email, so the snapshot uses first+last name, else a display_name without `@`, else "Farm team"). NOT VALID CHECKs: slug format/length/`new` reserved, title/excerpt/body/category sizes. Audited via `log_audit_event('Blog Post','title')`. |
 
+## Verifying a database matches the repo
+
+`supabase/verify_schema.sql` is a read-only script (paste into the Supabase
+SQL Editor): it lists every missing table, function, trigger and column,
+tables with RLS off, and any SECURITY DEFINER function anonymous visitors
+can call. Empty result (`OK`) = in sync. **Add new tables / functions /
+triggers to its lists in the same commit as the migration that creates
+them.** Symptom of a DB that is behind the repo: *"Could not find the
+function public.X in the schema cache."* Fix: run the missing migrations in
+order; if it persists, `notify pgrst, 'reload schema';`.
+
 ## Established patterns — reuse these, don't reinvent
 
 - **`lib/data/current-farm.ts` → `getCurrentFarmId()`** — every create action needs this to know which farm a new row belongs to. Single farm membership only for now (no farm-switcher UI exists); has a TODO comment for when that changes.

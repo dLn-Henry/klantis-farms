@@ -1,86 +1,57 @@
-# Klantis Farms — Public Website
+# Klantis Farms
 
-Next.js 14 + TypeScript + Tailwind CSS (combined with a small set of custom
-component classes in `app/globals.css`).
+A farm operating system with a public website and (soon) a marketplace.
+Next.js 14 + React 18 + TypeScript + Tailwind CSS, on Supabase
+(PostgreSQL, Auth, Row-Level Security).
 
-## Setup
+Start here:
+
+| Read | For |
+|---|---|
+| `ARCHITECTURE.md` | The stack, routes and data model as actually built (wins over the design docs) |
+| `SUPABASE_SETUP.md` | Connecting a Supabase project and applying migrations |
+| `BUILD_LOG.md` | Migration history, conventions, real-vs-mock status. **Read before adding a migration or write path.** |
+| `ROADMAP.md` | Phased plan |
+
+## Run it
 
 ```bash
 npm install
-npm run dev
+cp .env.local.example .env.local   # then fill in your Supabase URL + anon key
+npm run dev                        # http://localhost:3000
 ```
 
-Then open http://localhost:3000
+Then follow `SUPABASE_SETUP.md` to apply **all** migrations
+(`supabase/migrations/0001` ... `0016`, in order) and verify with
+`supabase/verify_schema.sql`.
 
-## What's in here
+## What's here
 
-This covers the full public site (Phase 1 + 2 of the roadmap):
-
-- Homepage
-- About, Our Farm, How We Farm, Farm Transparency
-- Produce directory + category pages (dynamic route)
-- Shop (lightweight listing — full cart/checkout is a later Commerce phase)
-- Cart (placeholder empty state — same reason as above)
-- Farm Journal (blog) home + article pages (dynamic route)
-- Contact, FAQ, Trust & Transparency
-- Privacy Policy, Terms & Conditions (**placeholder legal text — needs a
-  lawyer's review before this goes live**, flagged directly on those pages)
+- **Public site** (`app/(marketing)`): home, about, farm, how we farm,
+  transparency, produce, shop, cart, journal (blog), contact, FAQ, trust,
+  privacy, terms. Privacy and Terms are **placeholder legal text and need a
+  lawyer's review before launch.**
+- **Auth** (`app/(auth)`).
+- **Dashboard** (`app/dashboard`): livestock, crops, fields, harvests,
+  inventory ledger, veterinary reports with approval, tasks, finance,
+  suppliers, equipment, customers, orders, blog, team, audit log. Products
+  and Settings are not yet real (see `ROADMAP.md`).
 
 ## Design system
 
-Tokens live in `tailwind.config.ts`:
-
-- `green` (#1F6B45) — primary
-- `forest` (#123B2A) — dark sections, header/footer
-- `mist` (#EAF4EE) — light tinted backgrounds
-- `gold` (#D99A2B) — accents, ratings
-- `soil` (#795548) — earth accent, used sparingly
-- `ink` / `ink-soft` — text
-- `border`, `surface` — neutrals
-
-Font: Inter, loaded via `next/font/google` in `app/layout.tsx`.
-
-Reusable custom classes (`.btn-solid`, `.photo-slot`, `.prod-card`,
-`.cat-card`, `.faq-item`, etc.) live in `app/globals.css` under `@layer
-components` — Tailwind utilities and custom CSS combined, as requested.
-
-## Content that isn't hardcoded
-
-`lib/site-config.ts` holds site-wide content — name, tagline, phone, email,
-address, social links, footer text. This is a stand-in for what will later
-live in the `settings` table (per the Database spec) and be editable from
-`/dashboard/settings` once the admin app exists. Components import from
-this file rather than hardcoding strings, so swapping in a real data
-source later won't require touching component code.
-
-## Mock data
-
-`lib/data/mock/` holds placeholder categories, products, and farm
-production data. `lib/data/repositories/` wraps that data in `async`
-functions — deliberately, so that swapping mock data for a real Supabase
-query later is a one-file change per repository, not a rewrite of every
-page that consumes it.
+Tokens in `tailwind.config.ts`: `green` #1F6B45 (primary), `forest`
+#123B2A, `mist` #EAF4EE, `gold` #D99A2B, `soil` #795548, `ink`/`ink-soft`,
+`border`, `surface`. Font: Inter via `next/font/google`. Reusable classes
+(`.btn-solid`, `.prod-card`, `.cat-card`, ...) live in `app/globals.css`.
 
 ## Photography
 
-No real photos exist yet. Every image slot uses the `<PhotoSlot />`
-component (`components/ui/PhotoSlot.tsx`) — a labeled placeholder telling
-you exactly what photo belongs there. Search the codebase for
-`<PhotoSlot` to find every spot that needs a real image.
+Real photos don't exist yet; image slots use `<PhotoSlot />`
+(`components/ui/PhotoSlot.tsx`). Search for `<PhotoSlot` to find every slot.
 
-## A note on verification
+## Verify before you push
 
-This project could not be run through `npm install` / `npm run dev` in the
-environment it was built in (no package registry access there). Everything
-was checked as thoroughly as possible without that:
-
-- Every `@/...` import resolves to a real file (52 checked)
-- Every bracket/brace/paren is balanced across all files
-- No missing `"use client"` directives on components using hooks
-- No duplicate default exports
-- No unbalanced JSX `<div>` tags
-
-That's a strong signal, not a guarantee. Please run `npm install && npm run
-dev` on your end as the real first test, and let me know immediately if
-anything doesn't compile — I'd rather fix it now than have you debug a
-project you didn't write.
+```bash
+npx tsc --noEmit
+npm run build
+```
