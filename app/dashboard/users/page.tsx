@@ -4,11 +4,13 @@ import { UserPlus } from "lucide-react";
 import { DashboardTopbar } from "@/components/layout/DashboardTopbar";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { getAllTeamMembers } from "@/lib/data/repositories/users";
+import { getMyRoleName } from "@/lib/data/current-farm";
 
 export const metadata: Metadata = { title: "Users" };
 
 export default async function UsersPage() {
-  const members = await getAllTeamMembers();
+  const [members, myRole] = await Promise.all([getAllTeamMembers(), getMyRoleName()]);
+  const isOwner = myRole === "Farm Owner";
 
   return (
     <>
@@ -20,7 +22,9 @@ export default async function UsersPage() {
             <h2 className="text-lg font-extrabold">Team Members</h2>
             <p className="text-sm text-ink-soft mt-0.5">Who has access to Klantis Farms, and what they can do.</p>
           </div>
-          <button className="btn-solid"><UserPlus size={15} /> Invite User</button>
+          {isOwner && (
+            <Link href="/dashboard/users/new" className="btn-solid"><UserPlus size={15} /> Add Team Member</Link>
+          )}
         </div>
 
         <div className="bg-white border border-border rounded-md overflow-hidden overflow-x-auto">

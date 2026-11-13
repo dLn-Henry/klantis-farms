@@ -314,6 +314,25 @@ export type Database = {
         Args: { p_farm_id: string; p_prefix: string };
         Returns: string;
       };
+      list_farm_team: {
+        Args: { p_farm_id: string };
+        Returns: {
+          member_id: string; user_id: string; display_name: string; email: string | null;
+          role_name: string; status: string; joined_at: string;
+        }[];
+      };
+      add_farm_member: {
+        Args: { p_farm_id: string; p_email: string; p_role_name: string };
+        Returns: undefined;
+      };
+      set_member_role: {
+        Args: { p_member_id: string; p_role_name: string };
+        Returns: undefined;
+      };
+      set_member_status: {
+        Args: { p_member_id: string; p_status: string };
+        Returns: undefined;
+      };
     };
   };
 };

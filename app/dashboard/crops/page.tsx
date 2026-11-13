@@ -20,9 +20,9 @@ export default async function CropsPage() {
             <h2 className="text-lg font-extrabold">Crop Cycles</h2>
             <p className="text-sm text-ink-soft mt-0.5">Track every crop from planting through harvest.</p>
           </div>
-          <button className="btn-solid">
+          <Link href="/dashboard/crops/new" className="btn-solid">
             <Plus size={15} /> New Crop Cycle
-          </button>
+          </Link>
         </div>
 
         <div className="flex items-center gap-3 mb-5">

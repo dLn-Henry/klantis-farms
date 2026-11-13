@@ -20,7 +20,7 @@ export default async function SuppliersPage() {
             <h2 className="text-lg font-extrabold">Suppliers</h2>
             <p className="text-sm text-ink-soft mt-0.5">Who the farm buys from, and what for.</p>
           </div>
-          <button className="btn-solid"><Plus size={15} /> Add Supplier</button>
+          <Link href="/dashboard/suppliers/new" className="btn-solid"><Plus size={15} /> Add Supplier</Link>
         </div>
 
         <div className="bg-white border border-border rounded-md overflow-hidden overflow-x-auto">

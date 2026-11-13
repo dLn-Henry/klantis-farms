@@ -27,3 +27,27 @@ export async function getCurrentFarmId(): Promise<string | null> {
 
   return data?.farm_id ?? null;
 }
+
+// The signed-in user's role name on their current farm. Used only to decide
+// whether to *show* owner-only controls -- hiding a button is a convenience,
+// never the security boundary. The database functions re-check the role on
+// every call, so a user who forces the request anyway is still refused.
+export async function getMyRoleName(): Promise<string | null> {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data: membership } = await supabase
+    .from("farm_members")
+    .select("role_id")
+    .eq("user_id", user.id)
+    .eq("status", "active")
+    .limit(1)
+    .maybeSingle();
+  if (!membership) return null;
+
+  const { data: role } = await supabase.from("roles").select("name").eq("id", membership.role_id).maybeSingle();
+  return role?.name ?? null;
+}

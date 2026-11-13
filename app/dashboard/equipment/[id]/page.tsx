@@ -33,6 +33,8 @@ export default async function EquipmentDetailPage({ params }: Props) {
         </div>
         <p className="text-sm text-ink-soft mb-7">{eq.code} · {eq.manufacturer} {eq.model}</p>
 
+        <Link href={`/dashboard/equipment/${eq.id}/maintenance`} className="btn-solid inline-flex mb-8">Log Maintenance</Link>
+
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {[
             ["Category", eq.category],

@@ -3,6 +3,7 @@ export type Role = "Farm Owner" | "Farm Manager" | "Veterinarian" | "Inventory O
 
 export type TeamMember = {
   id: string;
+  userId?: string;
   name: string;
   email: string;
   role: Role;
@@ -18,11 +19,5 @@ export const teamMembers: TeamMember[] = [
   { id: "user-005", name: "Yaw Owusu", email: "yaw@klantisfarms.com", role: "Farm Worker", status: "Invited", joinedDate: "2026-08-15" },
 ];
 
-export const ROLE_PERMISSIONS: Record<Role, string[]> = {
-  "Farm Owner": ["Full access to all modules", "Manage team & permissions", "Approve veterinary reports", "View finance & reports"],
-  "Farm Manager": ["Manage livestock, crops & inventory", "Approve veterinary reports", "Manage orders & products", "View finance & reports"],
-  "Veterinarian": ["Submit veterinary reports", "View assigned animal health history", "Cannot approve own reports"],
-  "Inventory Officer": ["View & adjust inventory", "Record stock movements", "View suppliers"],
-  "Sales Manager": ["Manage products & orders", "View customers", "View sales reports"],
-  "Farm Worker": ["View & complete assigned tasks", "Record farm activities"],
-};
+// Role descriptions live in lib/data/role-descriptions.ts and describe what is
+// actually enforced. The old list here promised restrictions that don't exist.
