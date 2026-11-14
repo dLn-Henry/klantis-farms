@@ -1,10 +1,17 @@
 /** @type {import('next').NextConfig} */
+// Only images served by this project's Supabase Storage may be optimised by
+// next/image (it used to allow any https host, which lets anyone use your
+// server as an image proxy).
+const supabaseHost = process.env.NEXT_PUBLIC_SUPABASE_URL
+  ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname
+  : null;
+
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    remotePatterns: [
-      { protocol: "https", hostname: "**" },
-    ],
+    remotePatterns: supabaseHost
+      ? [{ protocol: "https", hostname: supabaseHost, pathname: "/storage/v1/object/public/**" }]
+      : [],
   },
   async redirects() {
     // The sitemap document (Doc 2) describes the farm application under

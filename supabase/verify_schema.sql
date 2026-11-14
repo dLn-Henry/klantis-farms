@@ -11,6 +11,7 @@
 -- ============================================================================
 with
 expected_tables(name) as (values
+    ('media'),
     ('animal_events'),
     ('animals'),
     ('audit_log'),
@@ -47,6 +48,8 @@ expected_tables(name) as (values
     ('veterinary_reports')
 ),
 expected_functions(sig) as (values
+    ('guard_media_update()'),
+    ('storage_path_farm(p_name text)'),
     ('add_farm_member(p_farm_id uuid, p_email text, p_role_name text)'),
     ('apply_inventory_transaction()'),
     ('farm_has_other_active_owner(p_farm_id uuid, p_excluding_member uuid)'),
@@ -72,6 +75,8 @@ expected_functions(sig) as (values
     ('set_task_completed_at()')
 ),
 expected_triggers(name) as (values
+    ('media.audit_media'),
+    ('media.guard_media_update_trigger'),
     ('animal_events.guard_ref_animal_events'),
     ('animals.audit_animals'),
     ('blog_posts.audit_blog_posts'),
@@ -125,6 +130,10 @@ have_triggers as (
 problems as (
   select 'MISSING TABLE' as kind, e.name as detail
     from expected_tables e where e.name not in (select name from have_tables)
+  union all
+  select 'MISSING STORAGE BUCKET', b.id
+    from (values ('site-media'), ('private-media')) b(id)
+    where not exists (select 1 from storage.buckets sb where sb.id = b.id)
   union all
   select 'RLS DISABLED', h.name
     from have_tables h where not h.rowsecurity

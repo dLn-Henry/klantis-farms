@@ -26,6 +26,21 @@ the same commit whenever something in this list changes.
 | `0015_team_management.sql` | **Closed a hole in 0010:** `next_farm_code` had no membership check and was executable by PUBLIC, so a worker on one farm (or an anonymous visitor) could burn another farm's numbering and spam junk prefix rows. Now: farm-membership check, fixed prefix allow-list (**add new prefixes in that function**), EXECUTE revoked from public/anon. **Team management as database functions** — `list_farm_team`, `add_farm_member`, `set_member_role`, `set_member_status` — instead of table policies: only a Farm Owner can add/re-role/suspend; nobody can change their own role or status; a farm always keeps one active owner; every change is audit-logged; emails only shown to owner/manager. `farm_members` itself still has NO client write policy (verified a direct UPDATE/INSERT is refused). |
 | `0016_blog_hardening.sql` | **Blog.** Public read = Published, or Scheduled whose `published_at` has passed (computed in the policy at query time, no cron). Old `for all` policy split into INSERT/UPDATE only; DELETE revoked. `guard_blog_post()` trigger: anyone on the farm can write Drafts; anything that is, was, or becomes Published/Scheduled needs Farm Owner/Manager; Scheduled requires a date; Published auto-dates (a past-due Scheduled post keeps its date); author can't be forged, farm/author immutable. `author_name` is a trigger snapshot via `safe_author_name()` so anonymous visitors never read `profiles` -- it **never returns an email** (`handle_new_user` in 0001 defaults `display_name` to the email, so the snapshot uses first+last name, else a display_name without `@`, else "Farm team"). NOT VALID CHECKs: slug format/length/`new` reserved, title/excerpt/body/category sizes. Audited via `log_audit_event('Blog Post','title')`. |
 
+### 0017 - media storage + library (Phase 1A)
+Two buckets: `site-media` (public: logo, favicon, blog/product images) and
+`private-media` (members only, signed URLs: vet photos/PDFs). Every object
+lives under `<farm_id>/...`; `storage_path_farm()` extracts that segment
+(returns NULL, never raises, on a malformed path) and the `storage.objects`
+policies key on it. `media` table records each upload; file facts are
+immutable (trigger), only alt text is editable. 5 MB cap and a MIME allowlist
+(**no SVG** -- it can carry script) enforced by the bucket *and* table
+CHECKs. Uploads go browser -> Storage directly (Vercel caps request bodies at
+~4.5 MB); `registerMedia()` then downloads the object, sniffs its magic bytes
+(`lib/media/sniff.ts`) and deletes it if it isn't what it claims. Tested live:
+cross-farm / malformed-path / outsider / anon inserts refused; vet can't delete
+someone else's file; table CHECKs reject svg, pdf-in-public, >5 MB, foreign
+path, spoofed uploader.
+
 ## Verifying a database matches the repo
 
 `supabase/verify_schema.sql` is a read-only script (paste into the Supabase

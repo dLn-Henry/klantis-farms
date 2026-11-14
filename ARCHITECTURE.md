@@ -14,7 +14,7 @@ actually built, and what we build on.
 | Backend | **Next.js server actions and server components** talking to Supabase. No separate Express/NestJS service. |
 | Database | **PostgreSQL on Supabase**, with Row-Level Security |
 | Auth | **Supabase Auth** (cookie sessions via `@supabase/ssr`, enforced in `middleware.ts`) |
-| Files | Supabase Storage (arrives in Phase 1) |
+| Files | Supabase Storage: `site-media` (public) and `private-media` (signed URLs). Browser uploads directly; the server re-verifies the real bytes. |
 | Payments | **Paystack** (Phase 3) |
 | Hosting | Vercel (app) + Supabase (data) |
 
@@ -49,7 +49,7 @@ Journal (blog) lives at `/journal`, not `/blog` as some documents say.
 
 The **live Supabase schema is the source of truth for table and column
 names**, and it is defined by `supabase/migrations/` (apply all of
-`0001`-`0016` in order; check with `supabase/verify_schema.sql`).
+`0001`-`0017` in order; check with `supabase/verify_schema.sql`).
 
 Docs 3, 7 and 12 each describe a *different, larger* target schema with
 different names (e.g. `inventory_movements` vs `inventory_transactions`,

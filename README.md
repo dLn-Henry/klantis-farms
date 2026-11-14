@@ -22,7 +22,7 @@ npm run dev                        # http://localhost:3000
 ```
 
 Then follow `SUPABASE_SETUP.md` to apply **all** migrations
-(`supabase/migrations/0001` ... `0016`, in order) and verify with
+(`supabase/migrations/0001` ... `0017`, in order) and verify with
 `supabase/verify_schema.sql`.
 
 ## What's here
