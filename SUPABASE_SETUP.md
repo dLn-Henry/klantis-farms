@@ -39,13 +39,13 @@ In your Supabase project dashboard, go to **SQL Editor**. Open each file in
 time, in numeric order**. Later files depend on earlier ones. If one errors,
 stop and read the error; don't skip ahead.
 
-Run **every** file, `0001` through `0016` (see `BUILD_LOG.md` for what each
+Run **every** file, `0001` through `0017` (see `BUILD_LOG.md` for what each
 one does). `0007` is safe to run even if you've effectively got it already
 (it is idempotent).
 
 > **Why all of them matters.** The app calls database functions such as
 > `next_farm_code`, `list_farm_team` and `add_farm_member`, and relies on
-> tables like `tasks`. Those are created by `0008`-`0016`. If only the
+> tables like `tasks`. Those are created by `0008`-`0017`. If only the
 > early files were run, saving a harvest, vet report, crop cycle, supplier,
 > equipment item or task fails with:
 > *"Could not find the function public.next_farm_code(p_farm_id, p_prefix)

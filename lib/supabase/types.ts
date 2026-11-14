@@ -152,6 +152,16 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["veterinary_reports"]["Row"]>;
         Relationships: [];
       };
+      media: {
+        Row: {
+          id: string; farm_id: string; bucket: string; path: string; file_name: string;
+          mime_type: string; size_bytes: number; alt_text: string | null;
+          uploaded_by: string | null; created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["media"]["Row"]>;
+        Update: Partial<Database["public"]["Tables"]["media"]["Row"]>;
+        Relationships: [];
+      };
       tasks: {
         Row: {
           id: string; farm_id: string; title: string; description: string | null; priority: string;

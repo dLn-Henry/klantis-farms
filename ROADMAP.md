@@ -6,8 +6,9 @@ and a live test against a real Postgres all exist (see BUILD_LOG.md).
 
 - [ ] **Phase 0 - Unblock the database.** Apply migrations 0008-0016,
       `verify_schema.sql`, docs/ARCHITECTURE, `/app` redirect.
-- [ ] **Phase 1 - Dashboard control centre.** Storage + media library;
-      site settings (name, logo, favicon, SEO, contact) editable from the
+- [ ] **Phase 1 - Dashboard control centre.**
+      - [x] 1A Storage + media library (migration 0017)
+      - [ ] 1B site settings (name, logo, favicon, SEO, contact) editable from the
       dashboard; blog featured + inline images with a sanitizing editor;
       vet-report photo attachments; richer dashboard home; notifications;
       global search / Ctrl+K; real Settings backend.
@@ -27,8 +28,6 @@ and a live test against a real Postgres all exist (see BUILD_LOG.md).
 
 ## Known items to revisit
 
-- `next.config.js` allows images from **any** https host
-  (`hostname: "**"`). Tighten to the Supabase Storage host in Phase 1.
 - Settings page is a form with no backend (Phase 1).
 - Most per-module write permissions beyond approvals are not enforced
   (Phase 6).
