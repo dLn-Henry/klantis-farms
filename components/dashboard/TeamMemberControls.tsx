@@ -3,26 +3,25 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { AlertCircle, Loader2 } from "lucide-react";
-import { changeMemberRole, setMemberStatus } from "@/lib/actions/team";
-import { ASSIGNABLE_ROLES } from "@/lib/data/role-descriptions";
-import type { Role, UserStatus } from "@/lib/data/mock/users";
+import { changeMemberRoles, setMemberStatus } from "@/lib/actions/team";
+import { RolePicker } from "@/components/dashboard/RolePicker";
+import type { RoleInfo } from "@/lib/data/repositories/roles";
+import type { UserStatus } from "@/lib/data/mock/users";
 
-const inputClass = "border border-border rounded-md px-3.5 py-2.5 text-sm focus:outline-none focus:border-green bg-white";
-
-export function TeamMemberControls({ memberId, role, status }: { memberId: string; role: Role; status: UserStatus }) {
+export function TeamMemberControls({
+  memberId, roles, allRoles, status,
+}: { memberId: string; roles: string[]; allRoles: RoleInfo[]; status: UserStatus }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const [selected, setSelected] = useState<Role>(role);
+  const [selected, setSelected] = useState<string[]>(roles);
+  const unchanged = selected.length === roles.length && selected.every((r) => roles.includes(r));
 
   function run(action: () => Promise<{ success: boolean; error?: string }>) {
     setError(null);
     startTransition(async () => {
       const result = await action();
-      if (!result.success) {
-        setError(result.error ?? "Something went wrong.");
-        return;
-      }
+      if (!result.success) { setError(result.error ?? "Something went wrong."); return; }
       router.refresh();
     });
   }
@@ -38,17 +37,17 @@ export function TeamMemberControls({ memberId, role, status }: { memberId: strin
         </div>
       )}
 
-      <div className="flex flex-wrap items-center gap-3 mb-4">
-        <select value={selected} onChange={(e) => setSelected(e.target.value as Role)} disabled={isPending} className={inputClass}>
-          {ASSIGNABLE_ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
-        </select>
+      <RolePicker roles={allRoles} value={selected} onChange={setSelected} disabled={isPending} />
+
+      <div className="flex flex-wrap items-center gap-3 mt-4 mb-6">
         <button
-          disabled={isPending || selected === role}
-          onClick={() => run(() => changeMemberRole(memberId, selected))}
+          disabled={isPending || unchanged || selected.length === 0}
+          onClick={() => run(() => changeMemberRoles(memberId, selected))}
           className="btn-solid disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          {isPending ? <Loader2 size={15} className="animate-spin" /> : "Change Role"}
+          {isPending ? <Loader2 size={15} className="animate-spin" /> : "Save roles"}
         </button>
+        {selected.length === 0 && <span className="text-xs text-[#C62828] font-semibold">Choose at least one role.</span>}
       </div>
 
       <button

@@ -3,13 +3,12 @@ import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { DashboardTopbar } from "@/components/layout/DashboardTopbar";
 import { BlogPostEditor } from "@/components/dashboard/BlogPostEditor";
-import { getMyRoleName } from "@/lib/data/current-farm";
+import { getAccess, can } from "@/lib/auth/access";
 
 export const metadata: Metadata = { title: "New Post" };
 
 export default async function NewBlogPostPage() {
-  const role = await getMyRoleName();
-  const canPublish = role === "Farm Owner" || role === "Farm Manager";
+  const canPublish = can(await getAccess(), "content.publish");
 
   return (
     <>

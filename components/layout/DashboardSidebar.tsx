@@ -10,12 +10,15 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { SITE_CONTENT } from "@/lib/site-config";
+import { REPORT_PERMISSIONS } from "@/lib/auth/access-keys";
 
 type NavItem = {
   label: string;
   href: string;
   icon: LucideIcon;
   live?: boolean;
+  /** Hidden unless the person holds at least one of these permissions. */
+  perm?: string | readonly string[];
 };
 
 const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
@@ -26,60 +29,66 @@ const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
   {
     title: "Farm Operations",
     items: [
-      { label: "Livestock", href: "/dashboard/livestock", icon: Beef, live: true },
-      { label: "Crops", href: "/dashboard/crops", icon: Sprout, live: true },
-      { label: "Fields", href: "/dashboard/fields", icon: MapPin, live: true },
-      { label: "Harvests", href: "/dashboard/harvests", icon: Wheat, live: true },
-      { label: "Veterinary", href: "/dashboard/veterinary", icon: Stethoscope, live: true },
+      { label: "Livestock", href: "/dashboard/livestock", icon: Beef, live: true, perm: "livestock.view" },
+      { label: "Crops", href: "/dashboard/crops", icon: Sprout, live: true, perm: "crops.view" },
+      { label: "Fields", href: "/dashboard/fields", icon: MapPin, live: true, perm: "fields.view" },
+      { label: "Harvests", href: "/dashboard/harvests", icon: Wheat, live: true, perm: "harvests.view" },
+      { label: "Veterinary", href: "/dashboard/veterinary", icon: Stethoscope, live: true, perm: "veterinary.view" },
     ],
   },
   {
     title: "Resources",
     items: [
-      { label: "Inventory", href: "/dashboard/inventory", icon: Package, live: true },
-      { label: "Equipment", href: "/dashboard/equipment", icon: Wrench, live: true },
-      { label: "Suppliers", href: "/dashboard/suppliers", icon: Truck, live: true },
+      { label: "Inventory", href: "/dashboard/inventory", icon: Package, live: true, perm: "inventory.view" },
+      { label: "Equipment", href: "/dashboard/equipment", icon: Wrench, live: true, perm: "equipment.view" },
+      { label: "Suppliers", href: "/dashboard/suppliers", icon: Truck, live: true, perm: "suppliers.view" },
     ],
   },
   {
     title: "Planning",
-    items: [{ label: "Tasks", href: "/dashboard/tasks", icon: ListChecks, live: true }],
+    items: [{ label: "Tasks", href: "/dashboard/tasks", icon: ListChecks, live: true, perm: "tasks.view" }],
   },
   {
     title: "Business",
     items: [
-      { label: "Orders", href: "/dashboard/orders", icon: ShoppingBag, live: true },
-      { label: "Products", href: "/dashboard/products", icon: Tag, live: true },
-      { label: "Customers", href: "/dashboard/customers", icon: Users, live: true },
-      { label: "Finance", href: "/dashboard/finance", icon: Wallet, live: true },
+      { label: "Orders", href: "/dashboard/orders", icon: ShoppingBag, live: true, perm: "orders.view" },
+      { label: "Products", href: "/dashboard/products", icon: Tag, live: true, perm: "products.view" },
+      { label: "Customers", href: "/dashboard/customers", icon: Users, live: true, perm: "customers.view" },
+      { label: "Finance", href: "/dashboard/finance", icon: Wallet, live: true, perm: "finance.view" },
     ],
   },
   {
     title: "Insights",
     items: [
-      { label: "Reports", href: "/dashboard/reports", icon: FileBarChart, live: true },
-      { label: "Analytics", href: "/dashboard/analytics", icon: BarChart3, live: true },
+      { label: "Reports", href: "/dashboard/reports", icon: FileBarChart, live: true, perm: REPORT_PERMISSIONS },
+      { label: "Analytics", href: "/dashboard/analytics", icon: BarChart3, live: true, perm: REPORT_PERMISSIONS },
     ],
   },
   {
     title: "Content",
     items: [
-      { label: "Blog", href: "/dashboard/blog", icon: Newspaper, live: true },
-      { label: "Media", href: "/dashboard/media", icon: ImageIcon, live: true },
+      { label: "Blog", href: "/dashboard/blog", icon: Newspaper, live: true, perm: "content.view" },
+      { label: "Media", href: "/dashboard/media", icon: ImageIcon, live: true, perm: "media.view" },
     ],
   },
   {
     title: "System",
     items: [
-      { label: "Users", href: "/dashboard/users", icon: UserCog, live: true },
-      { label: "Audit Log", href: "/dashboard/audit-log", icon: ScrollText, live: true },
-      { label: "Settings", href: "/dashboard/settings", icon: Settings, live: true },
+      { label: "Users", href: "/dashboard/users", icon: UserCog, live: true, perm: "team.view" },
+      { label: "Audit Log", href: "/dashboard/audit-log", icon: ScrollText, live: true, perm: "audit.view" },
+      { label: "Settings", href: "/dashboard/settings", icon: Settings, live: true, perm: "settings.view" },
     ],
   },
 ];
 
-export function DashboardSidebar() {
+export function DashboardSidebar({ permissions }: { permissions: string[] }) {
   const pathname = usePathname();
+  // Hide what this person's roles don't include, and any group left empty.
+  // (Display only: the database enforces the same permissions.)
+  const has = new Set(permissions);
+  const visible = (item: NavItem) =>
+    !item.perm || (typeof item.perm === "string" ? [item.perm] : item.perm).some((k) => has.has(k));
+  const groups = NAV_GROUPS.map((g) => ({ ...g, items: g.items.filter(visible) })).filter((g) => g.items.length > 0);
 
   return (
     <aside className="w-64 flex-shrink-0 bg-forest text-[#DCEBE0] min-h-screen hidden lg:flex flex-col">
@@ -95,7 +104,7 @@ export function DashboardSidebar() {
       </Link>
 
       <nav className="flex-1 overflow-y-auto py-5 px-4">
-        {NAV_GROUPS.map((group) => (
+        {groups.map((group) => (
           <div key={group.title} className="mb-6">
             <div className="text-[10px] font-bold uppercase tracking-wider text-[#7E9789] px-2 mb-2">
               {group.title}

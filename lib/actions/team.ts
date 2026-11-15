@@ -9,30 +9,31 @@ import { friendlyDbError } from "@/lib/actions/errors";
 export type TeamActionResult = { success: true } | { success: false; error: string };
 
 // Every rule (owner-only, no self-change, keep one active owner, audit
-// trail) lives in the database functions from migration 0015. These
+// trail) lives in the database functions (0015, extended for several roles in 0018). These
 // actions only call them and relay the answer -- nothing here decides who
 // is allowed to do what.
 
 export async function addTeamMember(formData: FormData): Promise<{ success: false; error: string }> {
   const email = String(formData.get("email") ?? "").trim();
-  const role = String(formData.get("role") ?? "").trim();
+  const roles = formData.getAll("roles").map((r) => String(r).trim()).filter(Boolean);
   if (!email) return { success: false, error: "Enter their email address." };
-  if (!role) return { success: false, error: "Choose a role." };
+  if (roles.length === 0) return { success: false, error: "Choose at least one role." };
 
   const farmId = await getCurrentFarmId();
   if (!farmId) return { success: false, error: "You're not a member of a farm yet." };
 
   const supabase = createClient();
-  const { error } = await supabase.rpc("add_farm_member", { p_farm_id: farmId, p_email: email, p_role_name: role });
+  const { error } = await supabase.rpc("add_farm_member", { p_farm_id: farmId, p_email: email, p_role_names: roles });
   if (error) return { success: false, error: friendlyDbError(error) };
 
   revalidatePath("/dashboard/users");
   redirect("/dashboard/users");
 }
 
-export async function changeMemberRole(memberId: string, role: string): Promise<TeamActionResult> {
+export async function changeMemberRoles(memberId: string, roles: string[]): Promise<TeamActionResult> {
+  if (roles.length === 0) return { success: false, error: "Choose at least one role." };
   const supabase = createClient();
-  const { error } = await supabase.rpc("set_member_role", { p_member_id: memberId, p_role_name: role });
+  const { error } = await supabase.rpc("set_member_roles", { p_member_id: memberId, p_role_names: roles });
   if (error) return { success: false, error: friendlyDbError(error) };
 
   revalidatePath(`/dashboard/users/${memberId}`);

@@ -189,6 +189,8 @@ insert into settings (farm_id, key, value) values
 -- become a member of the seeded farm. Find your id in the Supabase dashboard
 -- under Authentication > Users, or via `select id from auth.users;`.
 -- ============================================================================
--- insert into farm_members (farm_id, user_id, role_id)
--- select '22222222-2222-2222-2222-222222222222', 'YOUR-USER-ID-HERE', id
--- from roles where name = 'Farm Owner';
+-- insert into farm_members (farm_id, user_id)
+-- values ('22222222-2222-2222-2222-222222222222', 'YOUR-USER-ID-HERE');
+-- insert into farm_member_roles (member_id, role_id)
+-- select fm.id, r.id from farm_members fm, roles r
+-- where fm.user_id = 'YOUR-USER-ID-HERE' and r.name = 'Farm Owner';
