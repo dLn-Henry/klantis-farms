@@ -11,7 +11,6 @@
 -- ============================================================================
 with
 expected_tables(name) as (values
-    ('media'),
     ('animal_events'),
     ('animals'),
     ('audit_log'),
@@ -24,6 +23,7 @@ expected_tables(name) as (values
     ('equipment'),
     ('expenses'),
     ('farm_code_counters'),
+    ('farm_member_roles'),
     ('farm_members'),
     ('farms'),
     ('field_history'),
@@ -33,12 +33,16 @@ expected_tables(name) as (values
     ('inventory_items'),
     ('inventory_transactions'),
     ('maintenance_records'),
+    ('media'),
     ('order_items'),
     ('orders'),
     ('organizations'),
+    ('permissions'),
+    ('platform_admins'),
     ('product_categories'),
     ('products'),
     ('profiles'),
+    ('role_permissions'),
     ('roles'),
     ('settings'),
     ('species'),
@@ -48,15 +52,15 @@ expected_tables(name) as (values
     ('veterinary_reports')
 ),
 expected_functions(sig) as (values
-    ('guard_media_update()'),
-    ('storage_path_farm(p_name text)'),
-    ('add_farm_member(p_farm_id uuid, p_email text, p_role_name text)'),
+    ('add_farm_member(p_farm_id uuid, p_email text, p_role_names text[])'),
     ('apply_inventory_transaction()'),
     ('farm_has_other_active_owner(p_farm_id uuid, p_excluding_member uuid)'),
     ('guard_blog_post()'),
     ('guard_harvest_approval()'),
     ('guard_harvest_insert()'),
     ('guard_inventory_transaction()'),
+    ('guard_media_update()'),
+    ('guard_member_keeps_a_role()'),
     ('guard_same_farm_reference()'),
     ('guard_task_insert()'),
     ('guard_task_update()'),
@@ -64,19 +68,23 @@ expected_functions(sig) as (values
     ('guard_vet_report_review()'),
     ('handle_new_user()'),
     ('has_farm_role(target_farm_id uuid, allowed_role_names text[])'),
+    ('has_permission(target_farm_id uuid, perm text)'),
     ('is_farm_member(target_farm_id uuid)'),
+    ('is_platform_admin()'),
     ('list_farm_team(p_farm_id uuid)'),
     ('log_audit_event()'),
     ('log_vet_report_review()'),
+    ('my_access(p_farm_id uuid)'),
     ('next_farm_code(p_farm_id uuid, p_prefix text)'),
+    ('platform_set_farm_status(p_farm_id uuid, p_status text)'),
+    ('resolve_role_ids(p_role_names text[])'),
     ('safe_author_name(p_user uuid)'),
-    ('set_member_role(p_member_id uuid, p_role_name text)'),
+    ('set_member_roles(p_member_id uuid, p_role_names text[])'),
     ('set_member_status(p_member_id uuid, p_status text)'),
-    ('set_task_completed_at()')
+    ('set_task_completed_at()'),
+    ('storage_path_farm(p_name text)')
 ),
 expected_triggers(name) as (values
-    ('media.audit_media'),
-    ('media.guard_media_update_trigger'),
     ('animal_events.guard_ref_animal_events'),
     ('animals.audit_animals'),
     ('blog_posts.audit_blog_posts'),
@@ -87,6 +95,7 @@ expected_triggers(name) as (values
     ('equipment.audit_equipment'),
     ('expenses.audit_expenses'),
     ('expenses.guard_ref_expenses'),
+    ('farm_member_roles.guard_member_keeps_a_role_trigger'),
     ('harvests.audit_harvests'),
     ('harvests.guard_harvest_approval_trigger'),
     ('harvests.guard_harvest_insert_trigger'),
@@ -98,6 +107,8 @@ expected_triggers(name) as (values
     ('inventory_transactions.on_inventory_transaction_insert'),
     ('maintenance_records.audit_maintenance'),
     ('maintenance_records.guard_ref_maintenance'),
+    ('media.audit_media'),
+    ('media.guard_media_update_trigger'),
     ('orders.audit_orders'),
     ('orders.guard_ref_orders'),
     ('products.guard_ref_products'),
@@ -149,13 +160,26 @@ problems as (
     where not exists (select 1 from information_schema.columns c
                       where c.table_schema = 'public' and c.table_name = e.tbl and c.column_name = e.col)
   union all
-  -- SECURITY DEFINER functions callable by anonymous visitors. Only the two
-  -- membership helpers are allowed to be (see BUILD_LOG.md).
+  -- Permission-matrix invariants: these catch a bad edit to role_permissions.
+  select 'ROLE HAS NO PERMISSIONS', r.name
+    from roles r where not exists (select 1 from role_permissions rp where rp.role_id = r.id)
+  union all
+  select 'FARM OWNER MISSING PERMISSION', p.key
+    from permissions p
+    where not exists (select 1 from role_permissions rp join roles r on r.id = rp.role_id
+                      where r.name = 'Farm Owner' and rp.permission_key = p.key)
+  union all
+  select 'NON-OWNER CAN ASSIGN ROLES', r.name
+    from role_permissions rp join roles r on r.id = rp.role_id
+    where rp.permission_key = 'team.assign_roles' and r.name <> 'Farm Owner'
+  union all
+  -- SECURITY DEFINER functions callable by anonymous visitors. Only the
+  -- membership/permission helpers are allowed to be (see BUILD_LOG.md).
   select 'ANON CAN EXECUTE', p.proname
     from pg_proc p join pg_namespace n on n.oid = p.pronamespace
     where n.nspname = 'public' and p.prosecdef and p.prorettype <> 'trigger'::regtype
       and has_function_privilege('anon', p.oid, 'execute')
-      and p.proname not in ('is_farm_member', 'has_farm_role')
+      and p.proname not in ('is_farm_member', 'has_farm_role', 'has_permission', 'is_platform_admin')
 )
 select kind, detail from problems
 union all

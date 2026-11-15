@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentFarmId } from "@/lib/data/current-farm";
-import type { TeamMember, Role, UserStatus } from "@/lib/data/mock/users";
+import type { TeamMember, UserStatus } from "@/lib/data/mock/users";
 
 const STATUS_LABEL: Record<string, UserStatus> = {
   active: "Active",
@@ -25,7 +25,7 @@ export async function getAllTeamMembers(): Promise<TeamMember[]> {
     userId: m.user_id,
     name: m.display_name,
     email: m.email ?? "",
-    role: m.role_name as Role,
+    roles: m.role_names,
     status: STATUS_LABEL[m.status] ?? "Active",
     joinedDate: m.joined_at.slice(0, 10),
   }));

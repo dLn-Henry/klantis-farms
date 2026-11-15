@@ -49,7 +49,7 @@ Journal (blog) lives at `/journal`, not `/blog` as some documents say.
 
 The **live Supabase schema is the source of truth for table and column
 names**, and it is defined by `supabase/migrations/` (apply all of
-`0001`-`0017` in order; check with `supabase/verify_schema.sql`).
+`0001`-`0018` in order; check with `supabase/verify_schema.sql`).
 
 Docs 3, 7 and 12 each describe a *different, larger* target schema with
 different names (e.g. `inventory_movements` vs `inventory_transactions`,
@@ -60,8 +60,12 @@ migration, not a rewrite of the names above.
 Key shapes in use today:
 
 - Tenancy: `organizations` -> `farms` -> farm-scoped tables (all carry
-  `farm_id`); access via `farm_members` + `roles`, checked by
-  `is_farm_member()` / `has_farm_role()`.
+  `farm_id`). Membership is `farm_members`; **roles are separate**
+  (`farm_member_roles`, several per person) and grant **permissions**
+  (`role_permissions` -> `permissions`, keys like `finance.view`). Every policy
+  and guard asks `has_permission(farm_id, 'module.action')`. Only a Farm Owner
+  can assign roles. `platform_admins` (Platform Super Administrator) is separate
+  and sees no farm operational data.
 - Inventory is a **ledger**: `inventory_transactions` (via trigger) is the
   only thing that changes `inventory_items.quantity`.
 - Human-readable codes come from `next_farm_code()` (e.g. `HAR-2026-0007`).

@@ -46,7 +46,7 @@ export type Database = {
         Relationships: [];
       };
       farm_members: {
-        Row: { id: string; farm_id: string; user_id: string; role_id: string; status: string; joined_at: string };
+        Row: { id: string; farm_id: string; user_id: string; status: string; joined_at: string };
         Insert: Partial<Database["public"]["Tables"]["farm_members"]["Row"]>;
         Update: Partial<Database["public"]["Tables"]["farm_members"]["Row"]>;
         Relationships: [];
@@ -150,6 +150,24 @@ export type Database = {
         };
         Insert: Partial<Database["public"]["Tables"]["veterinary_reports"]["Row"]>;
         Update: Partial<Database["public"]["Tables"]["veterinary_reports"]["Row"]>;
+        Relationships: [];
+      };
+      permissions: {
+        Row: { key: string; module: string; action: string; description: string };
+        Insert: Partial<Database["public"]["Tables"]["permissions"]["Row"]>;
+        Update: Partial<Database["public"]["Tables"]["permissions"]["Row"]>;
+        Relationships: [];
+      };
+      role_permissions: {
+        Row: { role_id: string; permission_key: string };
+        Insert: Partial<Database["public"]["Tables"]["role_permissions"]["Row"]>;
+        Update: Partial<Database["public"]["Tables"]["role_permissions"]["Row"]>;
+        Relationships: [];
+      };
+      farm_member_roles: {
+        Row: { member_id: string; role_id: string; assigned_by: string | null; assigned_at: string };
+        Insert: Partial<Database["public"]["Tables"]["farm_member_roles"]["Row"]>;
+        Update: Partial<Database["public"]["Tables"]["farm_member_roles"]["Row"]>;
         Relationships: [];
       };
       media: {
@@ -328,19 +346,27 @@ export type Database = {
         Args: { p_farm_id: string };
         Returns: {
           member_id: string; user_id: string; display_name: string; email: string | null;
-          role_name: string; status: string; joined_at: string;
+          role_names: string[]; status: string; joined_at: string;
         }[];
       };
       add_farm_member: {
-        Args: { p_farm_id: string; p_email: string; p_role_name: string };
+        Args: { p_farm_id: string; p_email: string; p_role_names: string[] };
         Returns: undefined;
       };
-      set_member_role: {
-        Args: { p_member_id: string; p_role_name: string };
+      set_member_roles: {
+        Args: { p_member_id: string; p_role_names: string[] };
         Returns: undefined;
       };
       set_member_status: {
         Args: { p_member_id: string; p_status: string };
+        Returns: undefined;
+      };
+      my_access: {
+        Args: { p_farm_id: string };
+        Returns: { roles: string[]; permissions: string[] };
+      };
+      platform_set_farm_status: {
+        Args: { p_farm_id: string; p_status: string };
         Returns: undefined;
       };
     };

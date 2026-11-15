@@ -39,7 +39,7 @@ In your Supabase project dashboard, go to **SQL Editor**. Open each file in
 time, in numeric order**. Later files depend on earlier ones. If one errors,
 stop and read the error; don't skip ahead.
 
-Run **every** file, `0001` through `0017` (see `BUILD_LOG.md` for what each
+Run **every** file, `0001` through `0018` (see `BUILD_LOG.md` for what each
 one does). `0007` is safe to run even if you've effectively got it already
 (it is idempotent).
 
@@ -71,6 +71,22 @@ notify pgrst, 'reload schema';
 Alternatively, with the Supabase CLI installed and the project linked
 (`npx supabase link`), `npx supabase db push` applies all migrations at once.
 
+### About migration 0018 (permissions)
+
+`0018` replaces "everyone on the farm can do everything" with real
+permissions, and lets a person hold several roles. Run it **before** deploying
+the matching app code, or the dashboard shows a red banner and hides most
+sections. Everyone keeps the role they have today. Afterwards, a Farm Owner
+can give people more roles from Dashboard -> Users.
+
+To make someone the **Platform Super Administrator** (manages which farms
+exist, independent of any farm's Owner; sees no farm operational data), run in
+the SQL editor -- there is deliberately no screen for this:
+
+```sql
+insert into platform_admins (user_id, note) values ('<their auth.users id>', 'why');
+```
+
 ## 5. Load the seed data
 
 Same process: open `supabase/seed.sql`, paste its contents into the SQL
@@ -96,9 +112,13 @@ This phase added `@supabase/supabase-js` and `@supabase/ssr`.
 4. Back in the **SQL Editor**, run:
 
    ```sql
-   insert into farm_members (farm_id, user_id, role_id)
-   select '22222222-2222-2222-2222-222222222222', 'YOUR-USER-ID-HERE', id
-   from roles where name = 'Farm Owner';
+   insert into farm_members (farm_id, user_id)
+   values ('22222222-2222-2222-2222-222222222222', 'YOUR-USER-ID-HERE');
+
+   insert into farm_member_roles (member_id, role_id)
+   select fm.id, r.id
+   from farm_members fm, roles r
+   where fm.user_id = 'YOUR-USER-ID-HERE' and r.name = 'Farm Owner';
    ```
 
    (Replace `YOUR-USER-ID-HERE` with the ID you copied.)

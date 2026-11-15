@@ -3,12 +3,13 @@ import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { DashboardTopbar } from "@/components/layout/DashboardTopbar";
 import { NewTeamMemberForm } from "@/components/dashboard/NewTeamMemberForm";
-import { getMyRoleName } from "@/lib/data/current-farm";
+import { getAccess, can } from "@/lib/auth/access";
+import { getRoleCatalog } from "@/lib/data/repositories/roles";
 
 export const metadata: Metadata = { title: "Add Team Member" };
 
 export default async function NewTeamMemberPage() {
-  const myRole = await getMyRoleName();
+  const [access, roles] = await Promise.all([getAccess(), getRoleCatalog()]);
 
   return (
     <>
@@ -18,10 +19,10 @@ export default async function NewTeamMemberPage() {
           <ChevronLeft size={14} /> Back to Users
         </Link>
         <h2 className="text-lg font-extrabold mb-1">Add Team Member</h2>
-        {myRole === "Farm Owner" ? (
+        {can(access, "team.assign_roles") ? (
           <>
             <p className="text-sm text-ink-soft mb-7">Give someone with an existing account access to this farm.</p>
-            <NewTeamMemberForm />
+            <NewTeamMemberForm roles={roles} />
           </>
         ) : (
           <p className="text-sm text-ink-soft">Only a Farm Owner can add team members.</p>

@@ -41,6 +41,39 @@ cross-farm / malformed-path / outsider / anon inserts refused; vet can't delete
 someone else's file; table CHECKs reject svg, pdf-in-public, >5 MB, foreign
 path, spoofed uploader.
 
+### 0018 - permission-based roles, several roles per person (Phase 1B)
+Before this, only approvals checked roles: every other table let ANY member
+read and write everything (a Farm Worker could edit finance). Now
+`permissions` (74 `module.action` keys) + `role_permissions` (data, changed only
+by migration) + `farm_member_roles` (a person may hold several roles; access is
+the UNION). `has_permission(farm, key)` is what every table policy and guard
+asks; `has_farm_role()` still works across all of a person's roles. `farm_members.role_id`
+is dropped (it was a second source of truth). Roles: the original six plus
+Accountant, Agronomist, Equipment Officer, Procurement Officer, Auditor
+(read-only everywhere). **Only a Farm Owner can assign roles**
+(`team.assign_roles` is held by no other role; `verify_schema.sql` fails if
+it ever is), nobody can change their own roles, a farm keeps >= 1 active Owner,
+every member keeps >= 1 role, and role changes are audited. Guards moved to
+permissions: vet review (`veterinary.review`), harvest approval
+(`harvests.approve`), blog publish (`content.publish`), manual stock
+"Adjustment" (`inventory.adjust`, new), and a person with only
+`tasks.complete` may change only the status of a task assigned to them.
+Storage policies follow `media.*`. **Platform Super Administrator** =
+`platform_admins` table (SQL-editor/service-role grant only): may view
+farms/organizations/memberships and suspend/reactivate a farm via
+`platform_set_farm_status()` (audited); sees NO operational farm data.
+Tested live: `supabase/tests/run.sh` (98 cases on Postgres 16).
+App side: `getAccess()` (one `my_access` RPC per request), permission-aware
+sidebar, a `ModuleGate` layout on every dashboard module ("no access" screen
+instead of empty tables), multi-role Users screens whose "what they can do"
+list is read from the same `role_permissions` table the database enforces. If
+0018 isn't applied, the dashboard shows a red banner instead of silently
+hiding everything.
+Adjustable decisions (data, not code): Farm Manager has no `reports.financial`
+and no `finance.delete`; Farm Worker can create/edit livestock records and
+create (not edit) crop activities and harvests; Veterinarians see all vet
+reports (assigned-animals scoping is a later refinement).
+
 ## Verifying a database matches the repo
 
 `supabase/verify_schema.sql` is a read-only script (paste into the Supabase
