@@ -1,4 +1,5 @@
 import { DashboardSidebar } from "@/components/layout/DashboardSidebar";
+import { redirect } from "next/navigation";
 import { getAccess } from "@/lib/auth/access";
 
 // Everything under /dashboard is private, per-user, farm-scoped data.
@@ -8,6 +9,8 @@ export const dynamic = "force-dynamic";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const access = await getAccess();
+  // Not a farm member (e.g. a customer): the farm workspace isn't theirs.
+  if (!access.farmId) redirect("/account");
   return (
     <div className="flex min-h-screen bg-surface">
       <DashboardSidebar permissions={access.permissions} />

@@ -1,3 +1,4 @@
+import { getAccess, can } from "@/lib/auth/access";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Plus } from "lucide-react";
@@ -8,6 +9,7 @@ import { getAllHarvests } from "@/lib/data/repositories/harvests";
 export const metadata: Metadata = { title: "Harvests" };
 
 export default async function HarvestsPage() {
+  const access = await getAccess();
   const harvests = await getAllHarvests();
 
   return (
@@ -20,7 +22,9 @@ export default async function HarvestsPage() {
             <h2 className="text-lg font-extrabold">Harvests</h2>
             <p className="text-sm text-ink-soft mt-0.5">Every harvest recorded, and where it went.</p>
           </div>
-          <Link href="/dashboard/harvests/new" className="btn-solid"><Plus size={15} /> Record Harvest</Link>
+          {can(access, "harvests.create") && (
+            <Link href="/dashboard/harvests/new" className="btn-solid"><Plus size={15} /> Record Harvest</Link>
+          )}
         </div>
 
         <div className="bg-white border border-border rounded-md overflow-hidden overflow-x-auto">

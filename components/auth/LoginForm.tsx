@@ -34,13 +34,6 @@ export function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit}>
-      <div className="bg-mist border border-border rounded-md px-4 py-3 mb-5">
-        <p className="text-xs text-ink-soft">
-          Sign in with an account created via <Link href="/register" className="font-bold text-green">Register</Link>,
-          or one added directly in your Supabase project.
-        </p>
-      </div>
-
       {error && (
         <div className="flex items-center gap-2.5 bg-[#FDECEA] border border-[#F5C6C6] rounded-md px-4 py-3 mb-5">
           <AlertCircle size={16} className="stroke-[#C62828] flex-shrink-0" />

@@ -31,6 +31,18 @@ validate shape, call the database, and relay the error. The UI hiding a
 button is convenience, never enforcement. Full conventions and the
 migration history are in `BUILD_LOG.md`; read it before adding a migration.
 
+## Workspaces (one login, separate areas)
+
+| Who | Lands on | Notes |
+|---|---|---|
+| Customer (any signed-in user who is not an active farm member) | `/account` | Storefront-style: orders, profile, password. Never sees `/dashboard`. |
+| Farm staff (active member of a farm) | `/dashboard` | Role-specific: Owner/Manager/Auditor get the farm overview; a vet gets assigned animals + own reports; others get own tasks + their sections. Can also use `/account`. |
+| Platform Super Administrator | (platform tools, later) | Separate `platform_admins` table; sees no farm operational data. |
+| Future farmer | opt-in from `/account/sell` | apply -> verification -> farm workspace (Phase 9). |
+
+Routing is enforced in `lib/supabase/middleware.ts` and the dashboard layout;
+data access is enforced by RLS regardless.
+
 ## Routes
 
 | Area | Prefix | Notes |
@@ -49,7 +61,7 @@ Journal (blog) lives at `/journal`, not `/blog` as some documents say.
 
 The **live Supabase schema is the source of truth for table and column
 names**, and it is defined by `supabase/migrations/` (apply all of
-`0001`-`0018` in order; check with `supabase/verify_schema.sql`).
+`0001`-`0019` in order; check with `supabase/verify_schema.sql`).
 
 Docs 3, 7 and 12 each describe a *different, larger* target schema with
 different names (e.g. `inventory_movements` vs `inventory_transactions`,

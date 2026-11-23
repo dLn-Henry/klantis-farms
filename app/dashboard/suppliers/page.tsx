@@ -1,3 +1,4 @@
+import { getAccess, can } from "@/lib/auth/access";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Plus } from "lucide-react";
@@ -8,6 +9,7 @@ import { getAllSuppliers } from "@/lib/data/repositories/suppliers";
 export const metadata: Metadata = { title: "Suppliers" };
 
 export default async function SuppliersPage() {
+  const access = await getAccess();
   const suppliers = await getAllSuppliers();
 
   return (
@@ -20,7 +22,9 @@ export default async function SuppliersPage() {
             <h2 className="text-lg font-extrabold">Suppliers</h2>
             <p className="text-sm text-ink-soft mt-0.5">Who the farm buys from, and what for.</p>
           </div>
-          <Link href="/dashboard/suppliers/new" className="btn-solid"><Plus size={15} /> Add Supplier</Link>
+          {can(access, "suppliers.create") && (
+            <Link href="/dashboard/suppliers/new" className="btn-solid"><Plus size={15} /> Add Supplier</Link>
+          )}
         </div>
 
         <div className="bg-white border border-border rounded-md overflow-hidden overflow-x-auto">

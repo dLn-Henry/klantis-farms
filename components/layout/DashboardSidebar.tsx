@@ -33,7 +33,7 @@ const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
       { label: "Crops", href: "/dashboard/crops", icon: Sprout, live: true, perm: "crops.view" },
       { label: "Fields", href: "/dashboard/fields", icon: MapPin, live: true, perm: "fields.view" },
       { label: "Harvests", href: "/dashboard/harvests", icon: Wheat, live: true, perm: "harvests.view" },
-      { label: "Veterinary", href: "/dashboard/veterinary", icon: Stethoscope, live: true, perm: "veterinary.view" },
+      { label: "Veterinary", href: "/dashboard/veterinary", icon: Stethoscope, live: true, perm: ["veterinary.view", "veterinary.create"] },
     ],
   },
   {
@@ -46,7 +46,7 @@ const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
   },
   {
     title: "Planning",
-    items: [{ label: "Tasks", href: "/dashboard/tasks", icon: ListChecks, live: true, perm: "tasks.view" }],
+    items: [{ label: "Tasks", href: "/dashboard/tasks", icon: ListChecks, live: true, perm: ["tasks.view", "tasks.view_own"] }],
   },
   {
     title: "Business",

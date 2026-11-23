@@ -50,6 +50,7 @@ function mapReport(row: VetReportRow, tagMap: Map<string, string>, nameMap: Map<
     animalId: row.animal_id,
     animalTag: tagMap.get(row.animal_id) ?? "—",
     submittedBy: (row.submitted_by && nameMap.get(row.submitted_by)) || "—",
+    submittedById: row.submitted_by ?? undefined,
     visitDate: row.visit_date,
     reason: row.reason ?? "",
     findings: row.findings ?? "",

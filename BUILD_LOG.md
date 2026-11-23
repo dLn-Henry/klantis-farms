@@ -74,6 +74,41 @@ and no `finance.delete`; Farm Worker can create/edit livestock records and
 create (not edit) crop activities and harvests; Veterinarians see all vet
 reports (assigned-animals scoping is a later refinement).
 
+### 0019 - strict role boundaries (Phase 1B revision)
+Feedback on 0018: still too wide (a vet saw the whole animal register and the
+media library; customers could reach the dashboard shell). Principle: **least
+privilege, and record-level scoping where a role's job is about specific
+records.** Researched how marketplaces and farm/vet software do it: one login
+with separate workspaces (customer account vs seller/farm area, seller status
+gated behind verification), and vets given farm-controlled, per-animal access.
+- **Media library is Owner/Manager only** (`media.*`); `verify_schema.sql` fails
+  if any other role gets it. Others attach files only *to a record*.
+- **Veterinarian**: only `veterinary.create/edit`, `livestock.view_assigned`,
+  `tasks.view_own/complete`. Sees ONLY animals with an OPEN `vet_assignments`
+  row (a manager assigns; closes automatically when the vet submits), only
+  their OWN reports (`submitted_by = auth.uid()`); cannot add/edit animals,
+  see inventory, finance, other tasks, the team, audit or settings. Cannot
+  report on an animal that isn't assigned. Cannot approve their own report.
+- **Report attachments** belong to the report: private `vet-reports` bucket,
+  `<farm>/<report>/<file>`, writable only by the author while the report is
+  Submitted/Changes Requested, readable by the author + reviewers, max 10
+  files, 5 MB, images/PDF only (server re-checks real bytes). Uploaded as part
+  of submitting the report, not via the media library.
+- **Tasks**: below manager, `tasks.view_own` = only tasks assigned to you.
+- Matrix trimmed for every role (see role_permissions; Auditor = read-only
+  everywhere except media/settings). `dashboard.overview` is a permission
+  (Owner, Manager, Auditor); everyone else gets a role-specific home.
+- **Customers** (anyone who is not an active farm member): own
+  `/account` workspace (orders, profile, password, "Sell on Klantis" preview);
+  middleware sends non-members away from `/dashboard`, the dashboard layout
+  redirects them too, and RLS gives them only their own customer/orders rows.
+  Farm staff reach `/account` too (they may also buy). Becoming a farmer will
+  be an opt-in from this account (apply -> verification -> farm workspace).
+Tested: `supabase/tests/run.sh` -- 185 cases (98 for 0018 + 87 for 0019).
+Known follow-ups: dashboard home still shows sample figures for Owner/Manager
+(replaced in 1H); gating of Edit/Delete buttons inside detail pages is partial
+(create buttons and review controls are gated; the database refuses the rest).
+
 ## Verifying a database matches the repo
 
 `supabase/verify_schema.sql` is a read-only script (paste into the Supabase

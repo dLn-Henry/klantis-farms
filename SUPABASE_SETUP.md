@@ -39,7 +39,7 @@ In your Supabase project dashboard, go to **SQL Editor**. Open each file in
 time, in numeric order**. Later files depend on earlier ones. If one errors,
 stop and read the error; don't skip ahead.
 
-Run **every** file, `0001` through `0018` (see `BUILD_LOG.md` for what each
+Run **every** file, `0001` through `0019` (see `BUILD_LOG.md` for what each
 one does). `0007` is safe to run even if you've effectively got it already
 (it is idempotent).
 
@@ -70,6 +70,14 @@ notify pgrst, 'reload schema';
 
 Alternatively, with the Supabase CLI installed and the project linked
 (`npx supabase link`), `npx supabase db push` applies all migrations at once.
+
+### About migration 0019 (strict role boundaries)
+
+Run `0019` after `0018`, **before** deploying the matching app code. It
+removes media access from everyone except Owner/Manager, restricts a
+Veterinarian to animals a manager assigns to them and their own reports,
+adds report attachments, and lets customers read only their own orders. After
+it, assign vets from Dashboard -> Veterinary ("Assign a veterinarian").
 
 ### About migration 0018 (permissions)
 

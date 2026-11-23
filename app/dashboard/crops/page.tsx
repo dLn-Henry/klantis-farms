@@ -1,3 +1,4 @@
+import { getAccess, can } from "@/lib/auth/access";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Plus, Search } from "lucide-react";
@@ -8,6 +9,7 @@ import { getAllCropCycles } from "@/lib/data/repositories/crop-cycles";
 export const metadata: Metadata = { title: "Crops" };
 
 export default async function CropsPage() {
+  const access = await getAccess();
   const cycles = await getAllCropCycles();
 
   return (
@@ -20,9 +22,11 @@ export default async function CropsPage() {
             <h2 className="text-lg font-extrabold">Crop Cycles</h2>
             <p className="text-sm text-ink-soft mt-0.5">Track every crop from planting through harvest.</p>
           </div>
-          <Link href="/dashboard/crops/new" className="btn-solid">
+          {can(access, "crops.create") && (
+            <Link href="/dashboard/crops/new" className="btn-solid">
             <Plus size={15} /> New Crop Cycle
           </Link>
+          )}
         </div>
 
         <div className="flex items-center gap-3 mb-5">
