@@ -6,6 +6,7 @@ export type VetReport = {
   animalTag: string;
   animalId: string;
   submittedBy: string;
+  submittedById?: string;
   visitDate: string;
   reason: string;
   findings: string;

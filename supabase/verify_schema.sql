@@ -49,11 +49,17 @@ expected_tables(name) as (values
     ('supplier_purchases'),
     ('suppliers'),
     ('tasks'),
+    ('vet_assignments'),
+    ('vet_report_attachments'),
     ('veterinary_reports')
 ),
 expected_functions(sig) as (values
     ('add_farm_member(p_farm_id uuid, p_email text, p_role_names text[])'),
     ('apply_inventory_transaction()'),
+    ('audit_vet_assignment()'),
+    ('can_edit_vet_report_files(p_report uuid)'),
+    ('can_view_vet_report_files(p_report uuid)'),
+    ('complete_vet_assignment_on_report()'),
     ('farm_has_other_active_owner(p_farm_id uuid, p_excluding_member uuid)'),
     ('guard_blog_post()'),
     ('guard_harvest_approval()'),
@@ -64,11 +70,14 @@ expected_functions(sig) as (values
     ('guard_same_farm_reference()'),
     ('guard_task_insert()'),
     ('guard_task_update()'),
+    ('guard_vet_assignment()'),
+    ('guard_vet_attachment_count()'),
     ('guard_vet_report_insert()'),
     ('guard_vet_report_review()'),
     ('handle_new_user()'),
     ('has_farm_role(target_farm_id uuid, allowed_role_names text[])'),
     ('has_permission(target_farm_id uuid, perm text)'),
+    ('is_assigned_animal(p_animal uuid)'),
     ('is_farm_member(target_farm_id uuid)'),
     ('is_platform_admin()'),
     ('list_farm_team(p_farm_id uuid)'),
@@ -82,7 +91,8 @@ expected_functions(sig) as (values
     ('set_member_roles(p_member_id uuid, p_role_names text[])'),
     ('set_member_status(p_member_id uuid, p_status text)'),
     ('set_task_completed_at()'),
-    ('storage_path_farm(p_name text)')
+    ('storage_path_farm(p_name text)'),
+    ('storage_path_report(p_name text)')
 ),
 expected_triggers(name) as (values
     ('animal_events.guard_ref_animal_events'),
@@ -118,6 +128,10 @@ expected_triggers(name) as (values
     ('tasks.guard_task_insert_trigger'),
     ('tasks.guard_task_update_trigger'),
     ('tasks.set_task_completed_at_trigger'),
+    ('vet_assignments.audit_vet_assignments'),
+    ('vet_assignments.guard_vet_assignment_trigger'),
+    ('vet_report_attachments.guard_vet_attachment_count_trigger'),
+    ('veterinary_reports.complete_vet_assignment_trigger'),
     ('veterinary_reports.guard_ref_vet_reports'),
     ('veterinary_reports.guard_vet_report_insert_trigger'),
     ('veterinary_reports.guard_vet_report_review_trigger'),
@@ -143,7 +157,7 @@ problems as (
     from expected_tables e where e.name not in (select name from have_tables)
   union all
   select 'MISSING STORAGE BUCKET', b.id
-    from (values ('site-media'), ('private-media')) b(id)
+    from (values ('site-media'), ('private-media'), ('vet-reports')) b(id)
     where not exists (select 1 from storage.buckets sb where sb.id = b.id)
   union all
   select 'RLS DISABLED', h.name
@@ -173,13 +187,23 @@ problems as (
     from role_permissions rp join roles r on r.id = rp.role_id
     where rp.permission_key = 'team.assign_roles' and r.name <> 'Farm Owner'
   union all
+  -- Sensitive-boundary invariants (0019): catches someone loosening a role.
+  select 'MEDIA ACCESS TOO WIDE', r.name || ' has ' || rp.permission_key
+    from role_permissions rp join roles r on r.id = rp.role_id
+    where rp.permission_key like 'media.%' and r.name not in ('Farm Owner', 'Farm Manager')
+  union all
+  select 'VETERINARIAN TOO WIDE', rp.permission_key
+    from role_permissions rp join roles r on r.id = rp.role_id
+    where r.name = 'Veterinarian'
+      and rp.permission_key not in ('veterinary.create', 'veterinary.edit', 'livestock.view_assigned', 'tasks.view_own', 'tasks.complete')
+  union all
   -- SECURITY DEFINER functions callable by anonymous visitors. Only the
   -- membership/permission helpers are allowed to be (see BUILD_LOG.md).
   select 'ANON CAN EXECUTE', p.proname
     from pg_proc p join pg_namespace n on n.oid = p.pronamespace
     where n.nspname = 'public' and p.prosecdef and p.prorettype <> 'trigger'::regtype
       and has_function_privilege('anon', p.oid, 'execute')
-      and p.proname not in ('is_farm_member', 'has_farm_role', 'has_permission', 'is_platform_admin')
+      and p.proname not in ('is_farm_member', 'has_farm_role', 'has_permission', 'is_platform_admin', 'is_assigned_animal')
 )
 select kind, detail from problems
 union all

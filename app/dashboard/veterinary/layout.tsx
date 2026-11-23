@@ -1,7 +1,6 @@
 import { ModuleGate } from "@/components/dashboard/ModuleGate";
 
-// Part of the permission model (migration 0018). This only decides what is
-// SHOWN; the database enforces the same permission on every read and write.
+// A vet holds veterinary.create (own reports); managers hold veterinary.view.
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return <ModuleGate perm={"veterinary.view"} section="Veterinary">{children}</ModuleGate>;
+  return <ModuleGate perm={["veterinary.view", "veterinary.create"]} section="Veterinary">{children}</ModuleGate>;
 }

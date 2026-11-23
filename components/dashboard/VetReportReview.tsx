@@ -8,7 +8,7 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import type { VetReport } from "@/lib/data/mock/vet-reports";
 import { reviewVetReport, type ReviewDecision } from "@/lib/actions/vet-reports";
 
-export function VetReportReview({ report }: { report: VetReport }) {
+export function VetReportReview({ report, canReview }: { report: VetReport; canReview: boolean }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -86,7 +86,18 @@ export function VetReportReview({ report }: { report: VetReport }) {
         </p>
       )}
 
-      {!decided ? (
+      {!decided && !canReview ? (
+        // The professional who submitted a report can't approve it (the database
+        // refuses too): they see where it stands instead of review buttons.
+        <div className="flex flex-wrap items-center gap-4">
+          <p className="text-sm text-ink-soft">
+            {report.status === "Changes Requested"
+              ? "A reviewer asked for changes. Update the report and add anything they need."
+              : "Waiting for a Farm Owner or Farm Manager to review this report."}
+          </p>
+          <Link href="/dashboard/veterinary" className="link-arrow">Back to my reports <ArrowRight /></Link>
+        </div>
+      ) : !decided ? (
         <div className="flex flex-wrap gap-3">
           <button disabled={isPending} onClick={() => handleDecision("Approved")} className="btn-solid disabled:opacity-60 disabled:cursor-not-allowed">
             {isPending ? <Loader2 size={15} className="animate-spin" /> : <CheckCircle2 size={15} />} Approve

@@ -1,3 +1,4 @@
+import { getAccess, can } from "@/lib/auth/access";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Plus, AlertTriangle } from "lucide-react";
@@ -14,6 +15,7 @@ const PRIORITY_STYLE: Record<string, string> = {
 };
 
 export default async function TasksPage() {
+  const access = await getAccess();
   const tasks = await getAllTasks();
 
   return (
@@ -26,17 +28,21 @@ export default async function TasksPage() {
             <h2 className="text-lg font-extrabold">Tasks</h2>
             <p className="text-sm text-ink-soft mt-0.5">Everything assigned across the farm, and what needs attention.</p>
           </div>
-          <Link href="/dashboard/tasks/new" className="btn-solid">
+          {can(access, "tasks.create") && (
+            <Link href="/dashboard/tasks/new" className="btn-solid">
             <Plus size={15} /> New Task
           </Link>
+          )}
         </div>
 
         {tasks.length === 0 ? (
           <div className="bg-white border border-border rounded-md p-10 text-center">
             <p className="text-sm font-semibold text-ink-soft mb-4">No tasks yet.</p>
+            {can(access, "tasks.create") && (
             <Link href="/dashboard/tasks/new" className="btn-solid inline-flex">
               <Plus size={15} /> Create your first task
             </Link>
+          )}
           </div>
         ) : (
           <div className="bg-white border border-border rounded-md overflow-hidden overflow-x-auto">

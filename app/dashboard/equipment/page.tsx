@@ -1,3 +1,4 @@
+import { getAccess, can } from "@/lib/auth/access";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Plus } from "lucide-react";
@@ -8,6 +9,7 @@ import { getAllEquipment } from "@/lib/data/repositories/equipment";
 export const metadata: Metadata = { title: "Equipment" };
 
 export default async function EquipmentPage() {
+  const access = await getAccess();
   const equipment = await getAllEquipment();
 
   return (
@@ -20,7 +22,9 @@ export default async function EquipmentPage() {
             <h2 className="text-lg font-extrabold">Equipment</h2>
             <p className="text-sm text-ink-soft mt-0.5">Farm machinery and tools, and their service history.</p>
           </div>
-          <Link href="/dashboard/equipment/new" className="btn-solid"><Plus size={15} /> Add Equipment</Link>
+          {can(access, "equipment.create") && (
+            <Link href="/dashboard/equipment/new" className="btn-solid"><Plus size={15} /> Add Equipment</Link>
+          )}
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">

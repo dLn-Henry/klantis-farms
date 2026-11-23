@@ -1,3 +1,4 @@
+import { getAccess, can } from "@/lib/auth/access";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Plus, Search } from "lucide-react";
@@ -8,6 +9,7 @@ import { getAllAnimals } from "@/lib/data/repositories/animals";
 export const metadata: Metadata = { title: "Livestock" };
 
 export default async function LivestockPage() {
+  const access = await getAccess();
   const animals = await getAllAnimals();
 
   return (
@@ -20,9 +22,11 @@ export default async function LivestockPage() {
             <h2 className="text-lg font-extrabold">Animals</h2>
             <p className="text-sm text-ink-soft mt-0.5">Manage and monitor animals across the farm.</p>
           </div>
-          <Link href="/dashboard/livestock/new" className="btn-solid">
+          {can(access, "livestock.create") && (
+            <Link href="/dashboard/livestock/new" className="btn-solid">
             <Plus size={15} /> Add Animal
           </Link>
+          )}
         </div>
 
         <div className="flex items-center gap-3 mb-5">

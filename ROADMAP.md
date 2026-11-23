@@ -10,6 +10,8 @@ and a live test against a real Postgres all exist (see BUILD_LOG.md).
       blueprint's Phase 1).
       - [x] 1A Storage + media library (migration 0017)
       - [x] 1B Roles & permissions, multiple roles per person (0018)
+      - [x] 1B-rev Strict boundaries: media Owner/Manager only, vet assignments +
+            report attachments, customer workspace `/account` (0019)
       - [ ] 1C Site identity (name, logo, favicon, SEO, contact) editable from
             the dashboard; blog featured + inline images (sanitizing editor);
             vet-report photo attachments
@@ -33,6 +35,8 @@ and a live test against a real Postgres all exist (see BUILD_LOG.md).
       activities, groups, documents, reports + export, real analytics.
 - [ ] **Phase 6 - Hardening.** Per-module permissions, tests,
       accessibility, performance, SEO, mobile quick-record.
+- [ ] **Phase 7+ (farmer opt-in)**: apply from `/account/sell`, verification, own farm
+      workspace (see ARCHITECTURE.md workspaces).
 - [ ] **Phase 7+ - Multi-farm marketplace, offline, sensors, AI.**
 
 ## Known items to revisit

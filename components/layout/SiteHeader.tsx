@@ -35,7 +35,7 @@ export function SiteHeader() {
             <span className="hidden md:inline">{SITE_CONTENT.deliveryRegionNote}</span>
           </div>
           <div className="flex items-center gap-5 opacity-90">
-            <Link href="#" className="hover:text-gold">Track Order</Link>
+            <Link href="/account/orders" className="hover:text-gold">Track Order</Link>
             <Link href="/contact" className="hover:text-gold">Help Centre</Link>
             <div className="flex gap-3">
               <a href={SITE_CONTENT.social.facebook} aria-label="Facebook"><Facebook size={13} /></a>
@@ -133,7 +133,7 @@ export function SiteHeader() {
             <button className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-mist" aria-label="Search">
               <Search size={19} />
             </button>
-            <Link href="/login" className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-mist" aria-label="Account">
+            <Link href="/account" className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-mist" aria-label="My account">
               <User size={19} />
             </Link>
             <Link href="/cart" className="relative w-10 h-10 rounded-full flex items-center justify-center hover:bg-mist" aria-label="Cart">

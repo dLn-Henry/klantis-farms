@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { DashboardTopbar } from "@/components/layout/DashboardTopbar";
+import { createClient } from "@/lib/supabase/server";
+import { getAccess, can } from "@/lib/auth/access";
+import { VetHome } from "@/components/dashboard/VetHome";
+import { RoleHome } from "@/components/dashboard/RoleHome";
 import {
   Beef, Sprout, Package, ShoppingBag, AlertTriangle,
   Stethoscope, Wheat,
@@ -28,7 +32,24 @@ const ACTIVITY = [
   { time: "07:55", text: "Tomato field irrigation completed" },
 ];
 
-export default function DashboardOverviewPage() {
+// Who sees what on the dashboard home:
+//   farm-wide overview  -> Farm Owner, Farm Manager, Auditor (dashboard.overview)
+//   veterinary home     -> a vet (only their assigned animals + own reports)
+//   role home           -> everyone else (own tasks + the sections their roles include)
+export default async function DashboardHomePage() {
+  const access = await getAccess();
+  if (!can(access, "dashboard.overview")) {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data: profile } = user ? await supabase.from("profiles").select("display_name").eq("id", user.id).maybeSingle() : { data: null };
+    const name = profile?.display_name || user?.email || "there";
+    const isVet = can(access, "veterinary.create") && !can(access, "livestock.view");
+    return isVet ? <VetHome name={name} /> : <RoleHome name={name} access={access} />;
+  }
+  return <FarmOverview />;
+}
+
+function FarmOverview() {
   return (
     <>
       <DashboardTopbar title="Dashboard" />

@@ -1,3 +1,4 @@
+import { getAccess, can } from "@/lib/auth/access";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Plus } from "lucide-react";
@@ -9,6 +10,7 @@ export const metadata: Metadata = { title: "Blog" };
 export const dynamic = "force-dynamic";
 
 export default async function BlogManagementPage() {
+  const access = await getAccess();
   const posts = await getAllPosts();
 
   return (
@@ -21,7 +23,9 @@ export default async function BlogManagementPage() {
             <h2 className="text-lg font-extrabold">Farm Journal Posts</h2>
             <p className="text-sm text-ink-soft mt-0.5">What's published, drafted, or scheduled on the public Farm Journal.</p>
           </div>
-          <Link href="/dashboard/blog/new" className="btn-solid"><Plus size={15} /> New Post</Link>
+          {can(access, "content.create") && (
+            <Link href="/dashboard/blog/new" className="btn-solid"><Plus size={15} /> New Post</Link>
+          )}
         </div>
 
         <div className="bg-white border border-border rounded-md overflow-hidden overflow-x-auto">
