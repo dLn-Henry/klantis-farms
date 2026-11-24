@@ -22,7 +22,7 @@ npm run dev                        # http://localhost:3000
 ```
 
 Then follow `SUPABASE_SETUP.md` to apply **all** migrations
-(`supabase/migrations/0001` ... `0019`, in order) and verify with
+(`supabase/migrations/0001` ... `0020`, in order) and verify with
 `supabase/verify_schema.sql`.
 
 ## What's here
@@ -48,6 +48,15 @@ Tokens in `tailwind.config.ts`: `green` #1F6B45 (primary), `forest`
 
 Real photos don't exist yet; image slots use `<PhotoSlot />`
 (`components/ui/PhotoSlot.tsx`). Search for `<PhotoSlot` to find every slot.
+
+## Tests
+
+```bash
+./supabase/tests/run.sh                      # database rules, scratch local Postgres (217 cases)
+npx tsx tests/markdown-safety.test.mts       # blog renderer vs hostile input
+npx tsx tests/images.test.mts                # image URL rules
+npx tsx tests/site-settings.test.mts         # settings -> public site logic
+```
 
 ## Verify before you push
 

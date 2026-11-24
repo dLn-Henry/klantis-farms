@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { SITE_CONTENT } from "@/lib/site-config";
+import { getSiteContent } from "@/lib/site-settings";
 import "./globals.css";
 
 const inter = Inter({
@@ -9,14 +9,28 @@ const inter = Inter({
   weight: ["400", "500", "600", "700", "800"],
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: `${SITE_CONTENT.name} — Cattle, Mangoes, Cashew, Yam & Maize`,
-    template: `%s — ${SITE_CONTENT.pageTitleSuffix}`,
-  },
-  description:
-    "Klantis Farms raises cattle and cultivates mangoes, cashew, yam and maize on one working farm in Ghana's Eastern Region.",
-};
+// Title, description, favicon and share image come from Dashboard -> Settings
+// (falling back to the defaults in lib/site-config.ts until something is saved).
+export async function generateMetadata(): Promise<Metadata> {
+  const site = await getSiteContent();
+  const share = site.ogImageUrl ?? site.logoUrl;
+  return {
+    title: {
+      default: `${site.name} — ${site.tagline}`,
+      template: `%s — ${site.pageTitleSuffix}`,
+    },
+    description: site.seoDescription,
+    ...(site.faviconUrl ? { icons: { icon: site.faviconUrl, apple: site.faviconUrl } } : {}),
+    openGraph: {
+      siteName: site.name,
+      title: `${site.name} — ${site.tagline}`,
+      description: site.seoDescription,
+      type: "website",
+      ...(share ? { images: [{ url: share }] } : {}),
+    },
+    twitter: { card: share ? "summary_large_image" : "summary" },
+  };
+}
 
 export default function RootLayout({
   children,

@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentFarmId } from "@/lib/data/current-farm";
 import type { Database } from "@/lib/supabase/types";
 import { friendlyDbError } from "@/lib/actions/errors";
+import { foreignImages } from "@/lib/content/images";
 
 export type PostActionResult = { success: false; error: string };
 
@@ -45,6 +46,8 @@ type Parsed =
       category: string | null;
       excerpt: string | null;
       body: string;
+      featuredPath: string | null;
+      featuredAlt: string | null;
       status: Status;
       publishedAt: string | null;
     };
@@ -56,6 +59,8 @@ function parse(formData: FormData): Parsed {
   const category = String(formData.get("category") ?? "").trim();
   const excerpt = String(formData.get("excerpt") ?? "").trim();
   const body = String(formData.get("body") ?? "").replace(/\r\n/g, "\n").trim();
+  const featuredPath = String(formData.get("featuredImagePath") ?? "").trim();
+  const featuredAlt = String(formData.get("featuredImageAlt") ?? "").trim();
   const status = String(formData.get("status") ?? "Draft") as Status;
   const scheduledFor = String(formData.get("scheduledFor") ?? "").trim();
 
@@ -64,6 +69,8 @@ function parse(formData: FormData): Parsed {
   if (excerpt.length > 500) return { ok: false, error: "The excerpt is too long (500 characters at most)." };
   if (category.length > 60) return { ok: false, error: "The category is too long (60 characters at most)." };
   if (body.length > 50000) return { ok: false, error: "The body is too long (50,000 characters at most)." };
+  if (featuredPath && !featuredAlt) return { ok: false, error: "Describe the featured image in a few words (alt text) so it works for screen readers and search." };
+  if (featuredAlt.length > 300) return { ok: false, error: "The featured image description is too long (300 characters at most)." };
   if (!STATUSES.includes(status)) return { ok: false, error: "Choose Draft, Scheduled or Published." };
   if (status !== "Draft" && !body) return { ok: false, error: "Write the post body before publishing or scheduling it." };
 
@@ -84,6 +91,8 @@ function parse(formData: FormData): Parsed {
     category: category || null,
     excerpt: excerpt || null,
     body,
+    featuredPath: featuredPath || null,
+    featuredAlt: featuredPath ? featuredAlt : null,
     status,
     publishedAt,
   };
@@ -103,8 +112,14 @@ export async function createPost(formData: FormData): Promise<PostActionResult> 
   const farmId = await getCurrentFarmId();
   if (!farmId) return { success: false, error: "You're not a member of a farm yet." };
 
+  if (foreignImages(parsed.body, farmId).length > 0) {
+    return { success: false, error: "Pictures in a post must come from your media library. Use the Image button to add them." };
+  }
+
   const row = {
     farm_id: farmId,
+    featured_image_path: parsed.featuredPath,
+    featured_image_alt: parsed.featuredAlt,
     title: parsed.title,
     category: parsed.category,
     excerpt: parsed.excerpt,
@@ -137,6 +152,10 @@ export async function updatePost(id: string, formData: FormData): Promise<PostAc
   const farmId = await getCurrentFarmId();
   if (!farmId) return { success: false, error: "You're not a member of a farm yet." };
 
+  if (foreignImages(parsed.body, farmId).length > 0) {
+    return { success: false, error: "Pictures in a post must come from your media library. Use the Image button to add them." };
+  }
+
   // The slug is deliberately NOT updated: changing it would break links
   // already shared or indexed. farm_id and author are immutable in the
   // database too.
@@ -145,6 +164,8 @@ export async function updatePost(id: string, formData: FormData): Promise<PostAc
     category: parsed.category,
     excerpt: parsed.excerpt,
     body: parsed.body,
+    featured_image_path: parsed.featuredPath,
+    featured_image_alt: parsed.featuredAlt,
     reading_time: readingTime(parsed.body),
     status: parsed.status,
   };

@@ -117,13 +117,40 @@
     @apply px-5 py-4 text-sm text-ink-soft leading-relaxed;
   }
 
-  /* Long-form article prose */
+  /* Long-form article prose (the Markdown written in the dashboard editor) */
   .prose-farm p {
     @apply text-base leading-8 text-ink mb-5;
   }
-  .prose-farm h2 {
-    @apply text-xl font-extrabold mt-8 mb-3;
+  .prose-farm h1,
+  .prose-farm h2,
+  .prose-farm h3 {
+    @apply font-extrabold tracking-tight mt-8 mb-3;
   }
+  .prose-farm h1 { @apply text-2xl; }
+  .prose-farm h2 { @apply text-xl; }
+  .prose-farm h3 { @apply text-lg; }
+  .prose-farm a {
+    @apply text-green font-semibold underline underline-offset-2;
+  }
+  .prose-farm strong { @apply font-bold; }
+  .prose-farm ul,
+  .prose-farm ol {
+    @apply mb-5 pl-6 space-y-1.5 text-base leading-8;
+  }
+  .prose-farm ul { @apply list-disc; }
+  .prose-farm ol { @apply list-decimal; }
+  .prose-farm blockquote {
+    @apply border-l-4 border-green bg-mist px-5 py-3 my-6 rounded-r-md text-ink-soft;
+  }
+  .prose-farm blockquote p { @apply mb-0; }
+  .prose-farm hr { @apply my-8 border-border; }
+  .prose-farm table {
+    @apply w-full text-sm border border-border my-6 block overflow-x-auto;
+  }
+  .prose-farm th,
+  .prose-farm td { @apply border border-border px-3 py-2 text-left; }
+  .prose-farm th { @apply bg-surface font-bold; }
+  .prose-farm code { @apply bg-surface px-1.5 py-0.5 rounded text-[0.9em]; }
 
   /* Legal page prose */
   .legal-prose h2 {

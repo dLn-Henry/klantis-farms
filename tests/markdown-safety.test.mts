@@ -1,0 +1,27 @@
+process.env.NEXT_PUBLIC_SUPABASE_URL = "https://abc.supabase.co";
+import { renderToStaticMarkup } from "react-dom/server";
+import React from "react";
+// Run: npx tsx tests/markdown-safety.test.mts
+(globalThis as any).React = React;
+import { MarkdownBody } from "../components/content/MarkdownBody";
+const R = (m: string) => renderToStaticMarkup(React.createElement(MarkdownBody, { markdown: m }));
+const GOOD = "https://abc.supabase.co/storage/v1/object/public/site-media/f/1.png";
+let fails = 0;
+const t = (name: string, ok: boolean, out: string) => { console.log(ok ? "PASS" : "FAIL", name, ok ? "" : "\n   " + out); if (!ok) fails++; };
+let o;
+o = R("Hello **world**\n\nSecond"); t("paragraphs + bold", o.includes("<strong>world</strong>") && o.includes("<p>Second</p>"), o);
+o = R("## Heading"); t("heading", o.includes("<h2>Heading</h2>"), o);
+o = R(`![farm](${GOOD})`); t("own-bucket image renders", o.includes(`src="${GOOD}"`) && o.includes('alt="farm"'), o);
+o = R("![x](https://evil.com/track.png)"); t("foreign image dropped", !o.includes("evil.com") && !o.includes("<img"), o);
+o = R("![x](http://abc.supabase.co/storage/v1/object/public/site-media/f/1.png)"); t("http (downgraded) own-host image dropped", !o.includes("<img"), o);
+o = R("![x](https://abc.supabase.co.evil.com/storage/v1/object/public/site-media/a.png)"); t("lookalike host dropped", !o.includes("<img"), o);
+o = R("![x](https://abc.supabase.co/storage/v1/object/public/site-media/../private-media/a.png)"); t("path traversal dropped", !o.includes("<img"), o);
+o = R("<script>alert(1)</script>\n\nok"); t("script tag not output", !o.includes("<script"), o);
+o = R('<img src=x onerror="alert(1)">'); t("raw img/onerror not output", !o.includes("onerror") && !o.includes("<img"), o);
+o = R("[click](javascript:alert(1))"); t("javascript: link neutralised", !/href="javascript/i.test(o), o);
+o = R("[click](data:text/html;base64,AAAA)"); t("data: link neutralised", !/href="data:/i.test(o), o);
+o = R("[ok](https://example.com)"); t("https link gets rel + target", o.includes('rel="noopener noreferrer nofollow"') && o.includes('target="_blank"'), o);
+o = R("[mail](mailto:a@b.com)"); t("mailto allowed", o.includes('href="mailto:a@b.com"'), o);
+o = R("| a | b |\n|---|---|\n| 1 | 2 |"); t("tables (gfm) work", o.includes("<table>"), o);
+o = R("<iframe src='https://evil.com'></iframe>"); t("iframe not output", !o.includes("<iframe"), o);
+process.exitCode = fails ? 1 : 0;

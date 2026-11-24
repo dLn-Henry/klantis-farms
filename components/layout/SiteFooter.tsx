@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Phone, Mail, MapPin, Facebook, Instagram, Twitter } from "lucide-react";
-import { SITE_CONTENT } from "@/lib/site-config";
+import { getSiteContent } from "@/lib/site-settings";
+import { BrandMark } from "@/components/layout/BrandMark";
 
 const QUICK_LINKS = [
   { label: "Home", href: "/" },
@@ -18,20 +19,15 @@ const CUSTOMER_LINKS = [
   { label: "Terms & Conditions", href: "/terms" },
 ];
 
-export function SiteFooter() {
+export async function SiteFooter() {
+  const SITE_CONTENT = await getSiteContent();
   return (
     <footer className="bg-forest text-[#B9CBC0] pt-16">
       <div className="max-w-[1280px] mx-auto px-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 pb-12">
           <div>
             <Link href="/" className="flex items-center gap-3">
-              <span className="w-10 h-10 rounded-[10px] bg-green flex items-center justify-center flex-shrink-0">
-                <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.6" className="w-[22px] h-[22px]">
-                  <path d="M12 3c-3 3-3 7 0 10 3-3 3-7 0-10Z" />
-                  <path d="M12 13v8" />
-                  <path d="M8 21h8" />
-                </svg>
-              </span>
+              <BrandMark logoUrl={SITE_CONTENT.logoUrl} name={SITE_CONTENT.name} className="w-10 h-10 rounded-[10px]" onDark />
               <span>
                 <span className="block text-white text-[19px] font-extrabold">{SITE_CONTENT.name}</span>
                 <span className="block text-[10.5px] text-[#9DB3A6] font-medium">{SITE_CONTENT.tagline}</span>
@@ -39,9 +35,9 @@ export function SiteFooter() {
             </Link>
             <p className="text-[13px] leading-relaxed mt-4 max-w-[280px]">{SITE_CONTENT.footerBlurb}</p>
             <div className="flex gap-2.5 mt-5">
-              <a href={SITE_CONTENT.social.facebook} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center"><Facebook size={15} /></a>
-              <a href={SITE_CONTENT.social.instagram} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center"><Instagram size={15} /></a>
-              <a href={SITE_CONTENT.social.twitter} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center"><Twitter size={15} /></a>
+              {SITE_CONTENT.social.facebook && <a href={SITE_CONTENT.social.facebook} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center"><Facebook size={15} /></a>}
+              {SITE_CONTENT.social.instagram && <a href={SITE_CONTENT.social.instagram} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center"><Instagram size={15} /></a>}
+              {SITE_CONTENT.social.twitter && <a href={SITE_CONTENT.social.twitter} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center"><Twitter size={15} /></a>}
             </div>
           </div>
 

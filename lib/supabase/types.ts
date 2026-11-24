@@ -332,6 +332,7 @@ export type Database = {
           id: string; farm_id: string | null; slug: string; title: string; category: string | null;
           excerpt: string | null; body: string | null; author_id: string | null; author_name: string | null; reading_time: string | null;
           status: string; published_at: string | null; created_at: string; updated_at: string;
+          featured_image_path: string | null; featured_image_alt: string | null;
         };
         Insert: Partial<Database["public"]["Tables"]["blog_posts"]["Row"]>;
         Update: Partial<Database["public"]["Tables"]["blog_posts"]["Row"]>;
@@ -348,7 +349,7 @@ export type Database = {
         Relationships: [];
       };
       settings: {
-        Row: { id: string; farm_id: string; key: string; value: string | null; updated_at: string };
+        Row: { id: string; farm_id: string; key: string; value: string | null; is_public: boolean; updated_at: string };
         Insert: Partial<Database["public"]["Tables"]["settings"]["Row"]>;
         Update: Partial<Database["public"]["Tables"]["settings"]["Row"]>;
         Relationships: [];

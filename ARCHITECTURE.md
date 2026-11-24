@@ -43,6 +43,15 @@ migration history are in `BUILD_LOG.md`; read it before adding a migration.
 Routing is enforced in `lib/supabase/middleware.ts` and the dashboard layout;
 data access is enforced by RLS regardless.
 
+## Public site content
+
+Site name, tagline, logo, favicon, contact details, social links and SEO
+defaults are rows in `settings` (public keys only, allowlisted by a database
+trigger) edited at Dashboard -> Settings and read by `getSiteContent()`.
+Blog posts are stored as Markdown and rendered with a locked-down renderer
+(`components/content/MarkdownBody.tsx`): no raw HTML, safe links, images only
+from our own public media bucket.
+
 ## Routes
 
 | Area | Prefix | Notes |
@@ -61,7 +70,7 @@ Journal (blog) lives at `/journal`, not `/blog` as some documents say.
 
 The **live Supabase schema is the source of truth for table and column
 names**, and it is defined by `supabase/migrations/` (apply all of
-`0001`-`0019` in order; check with `supabase/verify_schema.sql`).
+`0001`-`0020` in order; check with `supabase/verify_schema.sql`).
 
 Docs 3, 7 and 12 each describe a *different, larger* target schema with
 different names (e.g. `inventory_movements` vs `inventory_transactions`,

@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowRight } from "lucide-react";
-import { PhotoSlot } from "@/components/ui/PhotoSlot";
+import { PostImage } from "@/components/content/PostImage";
+import { MarkdownBody } from "@/components/content/MarkdownBody";
 import { getPublishedPostBySlug, getRelatedPosts } from "@/lib/data/repositories/posts";
 
 type Props = { params: { slug: string } };
@@ -13,7 +14,19 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = await getPublishedPostBySlug(params.slug);
-  return { title: post?.title ?? "Farm Journal" };
+  if (!post) return { title: "Farm Journal" };
+  const description = post.excerpt || undefined;
+  return {
+    title: post.title,
+    description,
+    openGraph: {
+      type: "article",
+      title: post.title,
+      description,
+      ...(post.featuredImageUrl ? { images: [{ url: post.featuredImageUrl, alt: post.featuredImageAlt }] } : {}),
+    },
+    twitter: { card: post.featuredImageUrl ? "summary_large_image" : "summary" },
+  };
 }
 
 export default async function ArticlePage({ params }: Props) {
@@ -45,11 +58,9 @@ export default async function ArticlePage({ params }: Props) {
 
       <section className="py-16">
         <div className="max-w-[1280px] mx-auto px-10">
-          <PhotoSlot label={`Photo — ${post.title}`} className="h-[360px] rounded-2xl" />
+          <PostImage url={post.featuredImageUrl} alt={post.featuredImageAlt} fallbackLabel={`Photo — ${post.title}`} className="h-[360px] rounded-2xl" priority />
           <div className="prose-farm max-w-[680px] mt-9">
-            {post.body.map((para, i) => (
-              <p key={i}>{para}</p>
-            ))}
+            <MarkdownBody markdown={post.body} />
           </div>
         </div>
       </section>
@@ -62,7 +73,7 @@ export default async function ArticlePage({ params }: Props) {
             {related.map((p) => (
               <div key={p.slug}>
                 <div className="relative">
-                  <PhotoSlot label={`Photo — ${p.title.slice(0, 24)}`} className="h-[150px] rounded-md mb-3" />
+                  <PostImage url={p.featuredImageUrl} alt={p.featuredImageAlt} fallbackLabel={`Photo — ${p.title.slice(0, 24)}`} className="h-[150px] rounded-md mb-3" />
                   <span className="absolute top-2.5 left-2.5 bg-forest text-white text-[9.5px] font-bold px-2.5 py-1 rounded uppercase">
                     {p.category}
                   </span>

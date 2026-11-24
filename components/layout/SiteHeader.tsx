@@ -4,7 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Search, User, ShoppingCart, Menu, Facebook, Instagram, ChevronDown } from "lucide-react";
-import { SITE_CONTENT } from "@/lib/site-config";
+import { BrandMark } from "@/components/layout/BrandMark";
+import type { SiteContent } from "@/lib/site-settings";
 import { categories } from "@/lib/data/mock/categories";
 
 const NAV_LINKS = [
@@ -17,7 +18,9 @@ const NAV_LINKS = [
   { label: "Contact", href: "/contact", dropdown: false },
 ] as const;
 
-export function SiteHeader() {
+export type HeaderSite = Pick<SiteContent, "name" | "tagline" | "announcementBar" | "deliveryRegionNote" | "social" | "logoUrl">;
+
+export function SiteHeader({ site }: { site: HeaderSite }) {
   const [open, setOpen] = useState(false);
   const [shopOpen, setShopOpen] = useState(false);
   const pathname = usePathname();
@@ -28,18 +31,15 @@ export function SiteHeader() {
       <div className="bg-forest text-[#DCEBE0]">
         <div className="max-w-[1280px] mx-auto px-10 h-[38px] flex items-center justify-between text-xs">
           <div className="hidden sm:flex items-center gap-7">
-            <span>
-              <b className="text-gold font-semibold">Harvest notice —</b>{" "}
-              mango season now underway
-            </span>
-            <span className="hidden md:inline">{SITE_CONTENT.deliveryRegionNote}</span>
+            {site.announcementBar && <span className="font-semibold text-gold">{site.announcementBar}</span>}
+            {site.deliveryRegionNote && <span className="hidden md:inline">{site.deliveryRegionNote}</span>}
           </div>
           <div className="flex items-center gap-5 opacity-90">
             <Link href="/account/orders" className="hover:text-gold">Track Order</Link>
             <Link href="/contact" className="hover:text-gold">Help Centre</Link>
             <div className="flex gap-3">
-              <a href={SITE_CONTENT.social.facebook} aria-label="Facebook"><Facebook size={13} /></a>
-              <a href={SITE_CONTENT.social.instagram} aria-label="Instagram"><Instagram size={13} /></a>
+              {site.social.facebook && <a href={site.social.facebook} aria-label="Facebook"><Facebook size={13} /></a>}
+              {site.social.instagram && <a href={site.social.instagram} aria-label="Instagram"><Instagram size={13} /></a>}
             </div>
           </div>
         </div>
@@ -49,19 +49,13 @@ export function SiteHeader() {
       <div className="bg-white border-b border-border sticky top-0 z-50">
         <div className="max-w-[1280px] mx-auto px-10 h-[88px] flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <span className="w-10 h-10 rounded-[10px] bg-green flex items-center justify-center flex-shrink-0">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.6" className="w-[22px] h-[22px]">
-                <path d="M12 3c-3 3-3 7 0 10 3-3 3-7 0-10Z" />
-                <path d="M12 13v8" />
-                <path d="M8 21h8" />
-              </svg>
-            </span>
+            <BrandMark logoUrl={site.logoUrl} name={site.name} className="w-10 h-10 rounded-[10px]" />
             <span>
               <span className="block text-[19px] font-extrabold tracking-tight leading-tight">
-                {SITE_CONTENT.name}
+                {site.name}
               </span>
               <span className="block text-[10.5px] text-ink-soft font-medium">
-                {SITE_CONTENT.tagline}
+                {site.tagline}
               </span>
             </span>
           </Link>

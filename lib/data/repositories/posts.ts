@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { createPublicClient } from "@/lib/supabase/public";
 import { getCurrentFarmId } from "@/lib/data/current-farm";
+import { publicMediaUrl } from "@/lib/content/images";
 
 export type PostStatus = "Published" | "Draft" | "Scheduled";
 
@@ -11,7 +12,11 @@ export type Post = {
   title: string;
   date: string;
   excerpt: string;
-  body: string[];
+  /** Markdown source. Plain paragraphs separated by blank lines are valid Markdown, so older posts render unchanged. */
+  body: string;
+  featuredImagePath: string | null;
+  featuredImageAlt: string;
+  featuredImageUrl: string | null;
   author: string;
   readingTime: string;
   status: PostStatus;
@@ -31,12 +36,14 @@ type PostRow = {
   status: string;
   published_at: string | null;
   created_at: string;
+  featured_image_path: string | null;
+  featured_image_alt: string | null;
 };
 
 // Never select author_id or farm_id for the public site: an anonymous visitor
 // only needs what is rendered on the page.
 const PUBLIC_COLUMNS =
-  "id, slug, title, category, excerpt, body, author_name, reading_time, status, published_at, created_at";
+  "id, slug, title, category, excerpt, body, author_name, reading_time, status, published_at, created_at, featured_image_path, featured_image_alt";
 
 function formatDate(iso: string | null): string {
   if (!iso) return "";
@@ -60,14 +67,6 @@ function effectiveStatus(status: string, publishedAt: string | null): PostStatus
   return status as PostStatus;
 }
 
-// Body is a single text column; paragraphs are separated by blank lines.
-function splitBody(body: string | null): string[] {
-  return (body ?? "")
-    .split(/\n\s*\n/)
-    .map((p) => p.trim())
-    .filter(Boolean);
-}
-
 function toPost(row: PostRow): Post {
   return {
     id: row.id,
@@ -76,7 +75,10 @@ function toPost(row: PostRow): Post {
     title: row.title,
     date: formatDate(row.published_at ?? row.created_at),
     excerpt: row.excerpt ?? "",
-    body: splitBody(row.body),
+    body: (row.body ?? "").replace(/\r\n/g, "\n").trim(),
+    featuredImagePath: row.featured_image_path,
+    featuredImageAlt: row.featured_image_alt ?? "",
+    featuredImageUrl: publicMediaUrl(row.featured_image_path),
     author: row.author_name ?? "Farm team",
     readingTime: row.reading_time ?? "1 min read",
     status: effectiveStatus(row.status, row.published_at),

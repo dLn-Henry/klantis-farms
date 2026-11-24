@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { PageIntro } from "@/components/marketing/PageIntro";
-import { PhotoSlot } from "@/components/ui/PhotoSlot";
+import { PostImage } from "@/components/content/PostImage";
 import { getPublishedPosts } from "@/lib/data/repositories/posts";
 
 export const dynamic = "force-dynamic";
@@ -38,7 +38,7 @@ export default async function JournalPage() {
             )}
             {featured && (
             <div className="grid md:grid-cols-2 gap-9 bg-surface rounded-2xl p-8 mb-9 items-center">
-              <PhotoSlot label={`Photo — ${featured.title.slice(0, 28)}`} className="h-[240px] rounded-lg" />
+              <PostImage url={featured.featuredImageUrl} alt={featured.featuredImageAlt} fallbackLabel={`Photo — ${featured.title.slice(0, 28)}`} className="h-[240px] rounded-lg" priority />
               <div>
                 <div className="text-xs font-semibold text-ink-soft">Featured · {featured.date}</div>
                 <h3 className="text-2xl font-extrabold tracking-tight mt-2 mb-3 leading-snug">{featured.title}</h3>
@@ -54,7 +54,7 @@ export default async function JournalPage() {
               {rest.map((post) => (
                 <div key={post.slug}>
                   <div className="relative">
-                    <PhotoSlot label={`Photo — ${post.title.slice(0, 24)}`} className="h-[150px] rounded-md mb-3" />
+                    <PostImage url={post.featuredImageUrl} alt={post.featuredImageAlt} fallbackLabel={`Photo — ${post.title.slice(0, 24)}`} className="h-[150px] rounded-md mb-3" />
                     <span className="absolute top-2.5 left-2.5 bg-forest text-white text-[9.5px] font-bold px-2.5 py-1 rounded uppercase">
                       {post.category}
                     </span>
