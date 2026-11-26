@@ -39,7 +39,7 @@ In your Supabase project dashboard, go to **SQL Editor**. Open each file in
 time, in numeric order**. Later files depend on earlier ones. If one errors,
 stop and read the error; don't skip ahead.
 
-Run **every** file, `0001` through `0019` (see `BUILD_LOG.md` for what each
+Run **every** file, `0001` through `0020` (see `BUILD_LOG.md` for what each
 one does). `0007` is safe to run even if you've effectively got it already
 (it is idempotent).
 
@@ -70,6 +70,14 @@ notify pgrst, 'reload schema';
 
 Alternatively, with the Supabase CLI installed and the project linked
 (`npx supabase link`), `npx supabase db push` applies all migrations at once.
+
+### About migration 0020 (site settings + blog images)
+
+Run `0020` after `0019`. It adds the database rules behind Dashboard ->
+Settings (which settings may be public, https-only social links, logo/favicon
+must come from your media library) and blog featured images. Deploy the matching
+app code after it. Then: Dashboard -> Media (upload a logo + favicon) ->
+Settings -> choose them -> Save.
 
 ### About migration 0019 (strict role boundaries)
 

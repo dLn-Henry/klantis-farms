@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { PageIntro } from "@/components/marketing/PageIntro";
-import { SITE_CONTENT } from "@/lib/site-config";
+import { getSiteContent } from "@/lib/site-settings";
 
 export const metadata: Metadata = {
   title: "Terms & Conditions",
 };
 
-export default function TermsPage() {
+export default async function TermsPage() {
+  const SITE_CONTENT = await getSiteContent();
   return (
     <>
       <PageIntro

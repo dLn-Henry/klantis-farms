@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { PageIntro } from "@/components/marketing/PageIntro";
-import { SITE_CONTENT } from "@/lib/site-config";
+import { getSiteContent } from "@/lib/site-settings";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
 };
 
-export default function PrivacyPage() {
+export default async function PrivacyPage() {
+  const SITE_CONTENT = await getSiteContent();
   return (
     <>
       <PageIntro

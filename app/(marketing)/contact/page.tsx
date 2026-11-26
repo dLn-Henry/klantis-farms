@@ -2,21 +2,21 @@ import type { Metadata } from "next";
 import { Mail, Phone, MapPin, Clock } from "lucide-react";
 import { PageIntro } from "@/components/marketing/PageIntro";
 import { ContactForm } from "@/components/marketing/ContactForm";
-import { SITE_CONTENT } from "@/lib/site-config";
+import { getSiteContent } from "@/lib/site-settings";
 
 export const metadata: Metadata = {
   title: "Contact",
   description: "Get in touch with Klantis Farms — general enquiries, orders, or bulk pricing.",
 };
 
-const CONTACT_INFO = [
-  { icon: Phone, label: "Phone", value: SITE_CONTENT.phone },
-  { icon: Mail, label: "Email", value: SITE_CONTENT.email },
-  { icon: MapPin, label: "Farm Location", value: SITE_CONTENT.address },
-  { icon: Clock, label: "Hours", value: SITE_CONTENT.hours },
-];
-
-export default function ContactPage() {
+export default async function ContactPage() {
+  const SITE_CONTENT = await getSiteContent();
+  const CONTACT_INFO = [
+    { icon: Phone, label: "Phone", value: SITE_CONTENT.phone },
+    { icon: Mail, label: "Email", value: SITE_CONTENT.email },
+    { icon: MapPin, label: "Farm Location", value: SITE_CONTENT.address },
+    { icon: Clock, label: "Hours", value: SITE_CONTENT.hours },
+  ].filter((c) => c.value);
   return (
     <>
       <PageIntro

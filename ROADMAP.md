@@ -12,9 +12,9 @@ and a live test against a real Postgres all exist (see BUILD_LOG.md).
       - [x] 1B Roles & permissions, multiple roles per person (0018)
       - [x] 1B-rev Strict boundaries: media Owner/Manager only, vet assignments +
             report attachments, customer workspace `/account` (0019)
-      - [ ] 1C Site identity (name, logo, favicon, SEO, contact) editable from
-            the dashboard; blog featured + inline images (sanitizing editor);
-            vet-report photo attachments
+      - [x] 1C Site identity (name, logo, favicon, SEO, contact) editable from
+            the dashboard; blog featured + inline images with a safe Markdown
+            editor (0020). (Vet-report photos shipped in 0019.)
       - [ ] 1D Navigation: 9 groups, role-aware, Ctrl+K search, quick-create,
             mobile nav, "planned" badges
       - [ ] 1E Tasks and calendar: multiple assignees, checklists, recurrence,

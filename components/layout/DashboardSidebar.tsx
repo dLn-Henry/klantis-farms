@@ -9,7 +9,7 @@ import {
   ListChecks, ImageIcon,
   type LucideIcon,
 } from "lucide-react";
-import { SITE_CONTENT } from "@/lib/site-config";
+import { BrandMark } from "@/components/layout/BrandMark";
 import { REPORT_PERMISSIONS } from "@/lib/auth/access-keys";
 
 type NavItem = {
@@ -81,7 +81,7 @@ const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
   },
 ];
 
-export function DashboardSidebar({ permissions }: { permissions: string[] }) {
+export function DashboardSidebar({ permissions, site }: { permissions: string[]; site: { name: string; logoUrl: string | null } }) {
   const pathname = usePathname();
   // Hide what this person's roles don't include, and any group left empty.
   // (Display only: the database enforces the same permissions.)
@@ -93,14 +93,8 @@ export function DashboardSidebar({ permissions }: { permissions: string[] }) {
   return (
     <aside className="w-64 flex-shrink-0 bg-forest text-[#DCEBE0] min-h-screen hidden lg:flex flex-col">
       <Link href="/" className="flex items-center gap-2.5 px-6 py-6 border-b border-white/10">
-        <span className="w-9 h-9 rounded-[9px] bg-green flex items-center justify-center flex-shrink-0">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.6" className="w-5 h-5">
-            <path d="M12 3c-3 3-3 7 0 10 3-3 3-7 0-10Z" />
-            <path d="M12 13v8" />
-            <path d="M8 21h8" />
-          </svg>
-        </span>
-        <span className="text-white font-extrabold text-[15px] leading-tight">{SITE_CONTENT.name}</span>
+        <BrandMark logoUrl={site.logoUrl} name={site.name} className="w-9 h-9 rounded-[9px]" onDark />
+        <span className="text-white font-extrabold text-[15px] leading-tight">{site.name}</span>
       </Link>
 
       <nav className="flex-1 overflow-y-auto py-5 px-4">

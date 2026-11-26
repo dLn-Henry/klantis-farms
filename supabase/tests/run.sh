@@ -42,5 +42,9 @@ run_suite klantis_test18 tests/0018_permissions.test.sql | tee /tmp/r18.txt
 echo "### suite 0019"; build klantis_test19 0019
 psql -q -v ON_ERROR_STOP=1 -d klantis_test19 -f tests/0019_seed.sql
 run_suite klantis_test19 tests/harness.sql tests/0019_boundaries.test.sql | tee /tmp/r19.txt
-cat /tmp/r18.txt /tmp/r19.txt > /tmp/klantis_test_results.txt
+echo "### suite 0020"; build klantis_test20 0020
+psql -q -v ON_ERROR_STOP=1 -d klantis_test20 -f tests/0019_seed.sql
+psql -q -v ON_ERROR_STOP=1 -d klantis_test20 -f tests/0020_seed.sql
+run_suite klantis_test20 tests/harness.sql tests/0020_site.test.sql | tee /tmp/r20.txt
+cat /tmp/r18.txt /tmp/r19.txt /tmp/r20.txt > /tmp/klantis_test_results.txt
 echo "TOTAL: PASS=$(grep -c '^PASS' /tmp/klantis_test_results.txt) FAIL=$(grep -c '^FAIL' /tmp/klantis_test_results.txt || true)"

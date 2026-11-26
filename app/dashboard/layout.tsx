@@ -1,6 +1,7 @@
 import { DashboardSidebar } from "@/components/layout/DashboardSidebar";
 import { redirect } from "next/navigation";
 import { getAccess } from "@/lib/auth/access";
+import { getSiteContent } from "@/lib/site-settings";
 
 // Everything under /dashboard is private, per-user, farm-scoped data.
 // Force dynamic rendering so each request is authenticated and RLS-scoped
@@ -8,12 +9,12 @@ import { getAccess } from "@/lib/auth/access";
 export const dynamic = "force-dynamic";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const access = await getAccess();
+  const [access, site] = await Promise.all([getAccess(), getSiteContent()]);
   // Not a farm member (e.g. a customer): the farm workspace isn't theirs.
   if (!access.farmId) redirect("/account");
   return (
     <div className="flex min-h-screen bg-surface">
-      <DashboardSidebar permissions={access.permissions} />
+      <DashboardSidebar permissions={access.permissions} site={{ name: site.name, logoUrl: site.logoUrl }} />
       <div className="flex-1 min-w-0">
         {access.error && (
           <div role="alert" className="bg-[#FDEDED] border-b border-[#F3C6C6] px-6 py-3 text-xs font-semibold text-[#C62828]">

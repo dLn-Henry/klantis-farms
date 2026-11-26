@@ -109,6 +109,40 @@ Known follow-ups: dashboard home still shows sample figures for Owner/Manager
 (replaced in 1H); gating of Edit/Delete buttons inside detail pages is partial
 (create buttons and review controls are gated; the database refuses the rest).
 
+### 0020 - site identity + blog images (Phase 1C)
+- **Site settings are real.** Dashboard -> Settings edits `settings` rows
+  (`site.*`, `contact.*`, `social.*`; public) which feed the public header,
+  footer, contact page, legal pages, auth screens, browser tab icon (favicon),
+  page titles/description and the link-preview (Open Graph) image. Defaults in
+  `lib/site-config.ts` apply until something is saved or if the DB can't be
+  reached, so a settings problem can never break the public site. Read via
+  `getSiteContent()` (anon client, cached, `revalidateTag("site-settings")` on
+  save). One public site for now: the farm whose `site.name` was saved first.
+  Required fields saved empty fall back to defaults; optional ones (announcement,
+  delivery note, social links) hide when empty.
+- **`guard_settings` trigger**: only an allowlist of site/contact/social keys
+  can be public (nothing sensitive can be published by mistake); social links
+  must be `https://`; email must look like one; logo/favicon/share image must be
+  a picture from THIS farm's `site-media` library; 600-char cap.
+- **Blog**: `blog_posts.featured_image_path/alt` (alt required; image must be
+  in the farm's library - trigger). Body is **Markdown** (old plain paragraphs
+  render unchanged). Editor has a toolbar, live preview, featured-image picker
+  and an Image button for inline pictures (MediaPicker over the media library).
+  Public render uses `react-markdown` with: raw HTML dropped, links limited to
+  http(s)/mailto/tel (external ones `rel="noopener noreferrer nofollow"`), and
+  images ONLY from this project's public media bucket. Saving also refuses
+  pictures from outside the farm's own folder.
+- **`guard_media_in_use`**: an image used as logo/favicon/share image or a
+  post's featured image can't be deleted from the library (farm cascade still
+  works).
+- Vet-report photos were delivered in 0019 (attachments belong to the report).
+Tested: `supabase/tests/run.sh` (217 cases: 98 + 87 + 32 for 0020);
+`npx tsx tests/markdown-safety.test.mts` (15 hostile-input cases),
+`tests/images.test.mts` (8), `tests/site-settings.test.mts` (12).
+Known: pages using the site name are statically cached up to 2 min / until a
+save revalidates them. The Owner/Manager dashboard home still shows sample
+figures (replaced in 1H). Multi-farm needs a platform-level site config (Phase 7).
+
 ## Verifying a database matches the repo
 
 `supabase/verify_schema.sql` is a read-only script (paste into the Supabase
