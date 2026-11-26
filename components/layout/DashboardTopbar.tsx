@@ -3,13 +3,18 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Search, Bell, ChevronDown, LogOut, Globe } from "lucide-react";
+import { Search, Bell, ChevronDown, LogOut, Globe, Plus, UserRound } from "lucide-react";
+import { useShell } from "@/components/layout/DashboardShell";
+import { QUICK_ACTIONS } from "@/lib/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 export function DashboardTopbar({ title }: { title: string }) {
   const router = useRouter();
   const supabase = createClient();
+  const { permissions, setPaletteOpen } = useShell();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
+  const actions = QUICK_ACTIONS.filter((a) => permissions.has(a.perm));
   const [userLabel, setUserLabel] = useState("...");
   const [userInitials, setUserInitials] = useState("··");
 
@@ -34,13 +39,41 @@ export function DashboardTopbar({ title }: { title: string }) {
       <h1 className="text-lg font-extrabold">{title}</h1>
 
       <div className="flex items-center gap-3">
-        <button className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-surface" aria-label="Search">
+        <button
+          type="button"
+          onClick={() => setPaletteOpen(true)}
+          className="hidden md:flex items-center gap-2 h-9 rounded-full border border-border px-3.5 text-xs text-ink-soft hover:border-green"
+          aria-label="Search (Ctrl+K)"
+        >
+          <Search size={14} /> Search <kbd className="text-[10px] font-bold bg-surface rounded px-1.5 py-0.5">Ctrl K</kbd>
+        </button>
+        <button type="button" onClick={() => setPaletteOpen(true)} className="md:hidden w-9 h-9 rounded-full flex items-center justify-center hover:bg-surface" aria-label="Search">
           <Search size={17} />
         </button>
-        <button className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-surface relative" aria-label="Notifications">
+
+        {actions.length > 0 && (
+          <div className="relative hidden lg:block">
+            <button type="button" onClick={() => setCreateOpen((v) => !v)} aria-haspopup="menu" aria-expanded={createOpen} className="btn-solid !py-2 !px-3.5 !text-xs">
+              <Plus size={14} /> New
+            </button>
+            {createOpen && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setCreateOpen(false)} />
+                <div role="menu" className="absolute top-full right-0 mt-2 w-56 bg-white border border-border rounded-md shadow-lg py-1.5 z-20">
+                  {actions.map((a) => (
+                    <Link key={a.href} href={a.href} role="menuitem" onClick={() => setCreateOpen(false)} className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold hover:bg-surface">
+                      <a.icon size={15} className="stroke-green" /> {a.label}
+                    </Link>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        <Link href="/dashboard/notifications" className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-surface" aria-label="Notifications">
           <Bell size={17} />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-gold" />
-        </button>
+        </Link>
 
         <div className="relative pl-3 border-l border-border ml-1">
           <button onClick={() => setMenuOpen((v) => !v)} className="flex items-center gap-2.5">
@@ -62,6 +95,13 @@ export function DashboardTopbar({ title }: { title: string }) {
                   onClick={() => setMenuOpen(false)}
                 >
                   <Globe size={15} className="stroke-ink-soft" /> View Public Site
+                </Link>
+                <Link
+                  href="/account"
+                  className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold hover:bg-surface"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  <UserRound size={15} className="stroke-ink-soft" /> My account
                 </Link>
                 <div className="border-t border-border my-1.5" />
                 <button

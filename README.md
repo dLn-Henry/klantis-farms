@@ -22,7 +22,7 @@ npm run dev                        # http://localhost:3000
 ```
 
 Then follow `SUPABASE_SETUP.md` to apply **all** migrations
-(`supabase/migrations/0001` ... `0020`, in order) and verify with
+(`supabase/migrations/0001` ... `0021`, in order) and verify with
 `supabase/verify_schema.sql`.
 
 ## What's here
@@ -52,10 +52,11 @@ Real photos don't exist yet; image slots use `<PhotoSlot />`
 ## Tests
 
 ```bash
-./supabase/tests/run.sh                      # database rules, scratch local Postgres (217 cases)
+./supabase/tests/run.sh                      # database rules, scratch local Postgres (237 cases)
 npx tsx tests/markdown-safety.test.mts       # blog renderer vs hostile input
 npx tsx tests/images.test.mts                # image URL rules
 npx tsx tests/site-settings.test.mts         # settings -> public site logic
+npx tsx tests/navigation.test.mts            # nav vs real pages, permissions and roles
 ```
 
 ## Verify before you push

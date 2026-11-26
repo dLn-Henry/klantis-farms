@@ -43,6 +43,14 @@ migration history are in `BUILD_LOG.md`; read it before adding a migration.
 Routing is enforced in `lib/supabase/middleware.ts` and the dashboard layout;
 data access is enforced by RLS regardless.
 
+## Dashboard navigation
+
+`lib/navigation.ts` is the single definition (nine groups; live vs planned;
+permission per item). Sidebar, mobile drawer, Ctrl+K palette and quick-create all
+read it, filtered by the signed-in person's permissions. Adding a page = add one
+entry (and `tests/navigation.test.mts` checks the page exists and the permission
+key is real). Per-person favourites/collapsed groups live in `user_preferences`.
+
 ## Public site content
 
 Site name, tagline, logo, favicon, contact details, social links and SEO
@@ -70,7 +78,7 @@ Journal (blog) lives at `/journal`, not `/blog` as some documents say.
 
 The **live Supabase schema is the source of truth for table and column
 names**, and it is defined by `supabase/migrations/` (apply all of
-`0001`-`0020` in order; check with `supabase/verify_schema.sql`).
+`0001`-`0021` in order; check with `supabase/verify_schema.sql`).
 
 Docs 3, 7 and 12 each describe a *different, larger* target schema with
 different names (e.g. `inventory_movements` vs `inventory_transactions`,

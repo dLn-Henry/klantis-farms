@@ -49,6 +49,7 @@ expected_tables(name) as (values
     ('supplier_purchases'),
     ('suppliers'),
     ('tasks'),
+    ('user_preferences'),
     ('vet_assignments'),
     ('vet_report_attachments'),
     ('veterinary_reports')
@@ -73,6 +74,7 @@ expected_functions(sig) as (values
     ('guard_settings()'),
     ('guard_task_insert()'),
     ('guard_task_update()'),
+    ('guard_user_preferences()'),
     ('guard_vet_assignment()'),
     ('guard_vet_attachment_count()'),
     ('guard_vet_report_insert()'),
@@ -134,6 +136,7 @@ expected_triggers(name) as (values
     ('tasks.guard_task_insert_trigger'),
     ('tasks.guard_task_update_trigger'),
     ('tasks.set_task_completed_at_trigger'),
+    ('user_preferences.guard_user_preferences_trigger'),
     ('vet_assignments.audit_vet_assignments'),
     ('vet_assignments.guard_vet_assignment_trigger'),
     ('vet_report_attachments.guard_vet_attachment_count_trigger'),
