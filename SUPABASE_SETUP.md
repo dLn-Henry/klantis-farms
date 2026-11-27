@@ -39,7 +39,7 @@ In your Supabase project dashboard, go to **SQL Editor**. Open each file in
 time, in numeric order**. Later files depend on earlier ones. If one errors,
 stop and read the error; don't skip ahead.
 
-Run **every** file, `0001` through `0020` (see `BUILD_LOG.md` for what each
+Run **every** file, `0001` through `0021` (see `BUILD_LOG.md` for what each
 one does). `0007` is safe to run even if you've effectively got it already
 (it is idempotent).
 
@@ -70,6 +70,12 @@ notify pgrst, 'reload schema';
 
 Alternatively, with the Supabase CLI installed and the project linked
 (`npx supabase link`), `npx supabase db push` applies all migrations at once.
+
+### About migration 0021 (dashboard preferences)
+
+Run `0021` after `0020`, before deploying the matching code. It stores each
+person's favourites and collapsed sidebar groups (their own row only). Without
+it the dashboard still works, but favourites don't save.
 
 ### About migration 0020 (site settings + blog images)
 

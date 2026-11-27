@@ -143,6 +143,42 @@ Known: pages using the site name are statically cached up to 2 min / until a
 save revalidates them. The Owner/Manager dashboard home still shows sample
 figures (replaced in 1H). Multi-farm needs a platform-level site config (Phase 7).
 
+### 0021 + navigation (Phase 1D)
+- **Nine approved groups** (Overview, Farm Operations, Resources & Procurement,
+  Workforce & Planning, Sales & Commerce, Finance, Insights & Traceability,
+  Website & Content, Administration) defined ONCE in `lib/navigation.ts`, used
+  by the sidebar, mobile drawer, Ctrl+K palette and quick-create. Each item has
+  `status: live | planned` (planned = muted SOON tag, not a link; toggle
+  "Show features coming soon") and a `perm` list so people only see what their
+  roles include. `tests/navigation.test.mts` fails if: a live item has no page,
+  a "planned" item already has one, a permission key isn't in the database
+  catalogue, or the role-visibility expectations change (e.g. only Owner/Manager
+  see Media; a vet sees Veterinary + Tasks only).
+- **Ctrl/Cmd+K palette** (`CommandPalette`): go-to pages, create actions, and
+  record search (`lib/actions/search.ts`: animals, crop cycles, fields, harvests,
+  inventory, equipment, suppliers, customers, orders, products, tasks, vet
+  reports, blog posts). Search runs through RLS, so people only find what they
+  may open (a vet finds only assigned animals, a worker only their tasks);
+  LIKE wildcards are escaped; 2-char minimum, 60-char cap, 4 hits per source.
+- **Quick-create** "+ New" menu (desktop) and "+" sheet (mobile), filtered by
+  create permissions; only pages that exist.
+- **Mobile**: bottom bar (Home, the person's main section, "+", Alerts, More) and
+  a slide-in drawer with the full navigation; content has bottom padding so the
+  bar never covers it.
+- **Preferences (migration 0021)**: `user_preferences` (own row only):
+  favourites (star on hover), collapsed groups, show-planned. DB-checked: max 12
+  favourites, each must look like `/dashboard/...` (no external or javascript:
+  links), group names letters only. Recents are kept in localStorage (not worth a
+  DB write per click). Optimistic UI, saved in the background.
+- Topbar: working search + "New" menu, bell links to the Notifications page
+  (an honest "coming soon" page; the fake unread dot is gone), "My account" link.
+- `DashboardShell` context replaces prop-drilling; `/dashboard/*` still renders
+  dynamically per request.
+Tested: `supabase/tests/run.sh` 237 cases (+20 for 0021); `npx tsx
+tests/navigation.test.mts` (26). Not done here (later): saved views/filters,
+breadcrumbs, multi-farm switcher UI (architecture is ready: `farmId` flows from
+`getAccess()`), notification counts (1F).
+
 ## Verifying a database matches the repo
 
 `supabase/verify_schema.sql` is a read-only script (paste into the Supabase
